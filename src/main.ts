@@ -5,13 +5,14 @@ import heroImg from './assets/hero.png'
 import { setupCounter } from './counter.ts'
 import { renderFooter } from './footer.ts'
 
-const appDisplayName = __APP_NAME__
+const packageName = __APP_NAME__.split('/').pop() || __APP_NAME__
+const appDisplayName = packageName
   .split('-')
   .map((word) => word.charAt(0).toUpperCase() + word.slice(1))
   .join(' ')
 
 document.querySelector<HTMLDivElement>('#app')!.innerHTML = `
-<header class="app-logo" aria-label="${appDisplayName}">
+<header class="app-logo">
   <img class="app-logo__icon" src="/favicon.svg" alt="" />
   <span class="app-logo__text">${appDisplayName}</span>
 </header>
