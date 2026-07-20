@@ -5,7 +5,17 @@ import heroImg from './assets/hero.png'
 import { setupCounter } from './counter.ts'
 import { renderFooter } from './footer.ts'
 
+const appDisplayName = __APP_NAME__
+  .split('-')
+  .map((word) => word.charAt(0).toUpperCase() + word.slice(1))
+  .join(' ')
+
 document.querySelector<HTMLDivElement>('#app')!.innerHTML = `
+<header class="app-logo" aria-label="${appDisplayName}">
+  <img class="app-logo__icon" src="/favicon.svg" alt="" />
+  <span class="app-logo__text">${appDisplayName}</span>
+</header>
+
 <section id="center">
   <div class="hero">
     <img src="${heroImg}" class="base" width="170" height="179">

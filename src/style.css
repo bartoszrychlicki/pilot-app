@@ -12,6 +12,7 @@
     rgba(0, 0, 0, 0.1) 0 10px 15px -3px, rgba(0, 0, 0, 0.05) 0 4px 6px -2px;
 
   --sans: system-ui, 'Segoe UI', Roboto, sans-serif;
+  --font-logo: 'Space Grotesk', var(--sans);
   --heading: system-ui, 'Segoe UI', Roboto, sans-serif;
   --mono: ui-monospace, Consolas, monospace;
 
@@ -171,6 +172,28 @@ code {
   display: flex;
   flex-direction: column;
   box-sizing: border-box;
+}
+
+.app-logo {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+  padding: 24px 20px 0;
+}
+
+.app-logo__icon {
+  width: 2rem;
+  height: 2rem;
+  flex: none;
+}
+
+.app-logo__text {
+  font-family: var(--font-logo);
+  font-size: clamp(1.25rem, 4vw, 1.75rem);
+  font-weight: 700;
+  letter-spacing: -0.02em;
+  color: var(--accent);
 }
 
 #center {
