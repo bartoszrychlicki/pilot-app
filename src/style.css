@@ -117,6 +117,11 @@ code {
   }
 }
 
+.counter-group {
+  display: flex;
+  gap: 8px;
+}
+
 .hero {
   position: relative;
 
