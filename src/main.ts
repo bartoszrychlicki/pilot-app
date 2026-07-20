@@ -15,7 +15,10 @@ document.querySelector<HTMLDivElement>('#app')!.innerHTML = `
     <h1>Get started</h1>
     <p>Edit <code>src/main.ts</code> and save to test <code>HMR</code></p>
   </div>
-  <button id="counter" type="button" class="counter"></button>
+  <div class="counter-group">
+    <button id="counter" type="button" class="counter"></button>
+    <button id="reset" type="button" class="counter reset">Reset</button>
+  </div>
 </section>
 
 <div class="ticks"></div>
@@ -57,4 +60,7 @@ document.querySelector<HTMLDivElement>('#app')!.innerHTML = `
 <section id="spacer"></section>
 `
 
-setupCounter(document.querySelector<HTMLButtonElement>('#counter')!)
+setupCounter(
+  document.querySelector<HTMLButtonElement>('#counter')!,
+  document.querySelector<HTMLButtonElement>('#reset')!,
+)
