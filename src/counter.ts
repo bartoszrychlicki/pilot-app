@@ -2,7 +2,7 @@ export function setupCounter(element: HTMLButtonElement, resetElement: HTMLButto
   let counter = 0
   const setCounter = (count: number) => {
     counter = count
-    element.innerHTML = `Count is ${counter}`
+    element.innerHTML = `Licznik: ${counter}`
   }
   element.addEventListener('click', () => setCounter(counter + 1))
   resetElement.addEventListener('click', () => setCounter(0))
