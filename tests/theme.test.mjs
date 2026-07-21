@@ -6,6 +6,7 @@ import {
   getPreferredTheme,
   getThemeBootstrapScript,
   renderThemeToggle,
+  resolveTheme,
   setupThemeToggle,
 } from '../src/theme.ts'
 
@@ -72,10 +73,7 @@ describe('getPreferredTheme', () => {
   })
 })
 
-test('the generated bootstrap script validates storage', () => {
-  storedTheme = 'legacy-theme'
-  prefersDark = true
-  const bootstrapDocument = { documentElement: { dataset: {} } }
+test('the generated bootstrap script resolves themes identically to resolveTheme', () => {
   const runBootstrap = new Function(
     'localStorage',
     'matchMedia',
@@ -83,9 +81,20 @@ test('the generated bootstrap script validates storage', () => {
     getThemeBootstrapScript(),
   )
 
-  runBootstrap(localStorageMock, () => ({ matches: prefersDark }), bootstrapDocument)
+  for (const storedThemeValue of [null, 'light', 'dark', 'invalid']) {
+    for (const prefersDarkValue of [true, false]) {
+      storedTheme = storedThemeValue
+      prefersDark = prefersDarkValue
+      const bootstrapDocument = { documentElement: { dataset: {} } }
 
-  assert.equal(bootstrapDocument.documentElement.dataset.theme, 'dark')
+      runBootstrap(localStorageMock, () => ({ matches: prefersDark }), bootstrapDocument)
+
+      assert.equal(
+        bootstrapDocument.documentElement.dataset.theme,
+        resolveTheme(storedTheme, prefersDark),
+      )
+    }
+  }
 })
 
 describe('renderThemeToggle', () => {

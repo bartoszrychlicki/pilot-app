@@ -19,7 +19,7 @@ export function getPreferredTheme(): Theme {
 }
 
 export function getThemeBootstrapScript(): string {
-  return `(function(){var storedTheme=localStorage.getItem(${JSON.stringify(THEME_STORAGE_KEY)});var prefersDark=matchMedia(${JSON.stringify(DARK_THEME_QUERY)}).matches;var theme=storedTheme==='light'||storedTheme==='dark'?storedTheme:prefersDark?'dark':'light';document.documentElement.dataset.theme=theme})()`
+  return `(function(){var resolveTheme=${resolveTheme.toString()};var storedTheme=localStorage.getItem(${JSON.stringify(THEME_STORAGE_KEY)});var prefersDark=matchMedia(${JSON.stringify(DARK_THEME_QUERY)}).matches;var theme=resolveTheme(storedTheme,prefersDark);document.documentElement.dataset.theme=theme})()`
 }
 
 export function applyTheme(theme: Theme): void {
