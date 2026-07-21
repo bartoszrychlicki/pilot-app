@@ -246,3 +246,31 @@ test('unrecognized shortcuts do not change the counter', () => {
     assert.equal(counterButton.innerHTML, 'Licznik: 3')
   })
 })
+
+test('reports increments and resets from clicks and keyboard shortcuts', () => {
+  withLocalStorage(createMemoryStorage(), () => {
+    const counterButton = new FakeButton()
+    const resetButton = new FakeButton()
+    const keyTarget = new FakeEventTarget()
+    let increments = 0
+    let resets = 0
+
+    setupCounter(counterButton, resetButton, keyTarget, {
+      onIncrement: () => {
+        increments += 1
+      },
+      onReset: () => {
+        resets += 1
+      },
+    })
+
+    counterButton.click()
+    keyTarget.keydown('+')
+    keyTarget.keydown('=')
+    resetButton.click()
+    keyTarget.keydown('r')
+
+    assert.equal(increments, 3)
+    assert.equal(resets, 2)
+  })
+})

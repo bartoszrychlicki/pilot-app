@@ -17,6 +17,10 @@ export function setupCounter(
   element: HTMLButtonElement,
   resetElement: HTMLButtonElement,
   keyTarget: EventTarget = document,
+  callbacks?: {
+    onIncrement?: () => void
+    onReset?: () => void
+  },
 ) {
   let counter = 0
   const setCounter = (count: number) => {
@@ -36,10 +40,15 @@ export function setupCounter(
     void element.offsetWidth
     element.classList.add('counter--pulse')
     setCounter(counter + 1)
+    callbacks?.onIncrement?.()
+  }
+  const reset = () => {
+    setCounter(0)
+    callbacks?.onReset?.()
   }
   element.addEventListener('animationend', () => element.classList.remove('counter--pulse'))
   element.addEventListener('click', increment)
-  resetElement.addEventListener('click', () => setCounter(0))
+  resetElement.addEventListener('click', reset)
   const handleKeydown = (event: Event) => {
     const keyboardEvent = event as KeyboardEvent
     const target = keyboardEvent.target as HTMLElement | null
@@ -61,7 +70,7 @@ export function setupCounter(
       increment()
     } else if (keyboardEvent.key === 'r' || keyboardEvent.key === 'R') {
       keyboardEvent.preventDefault()
-      setCounter(0)
+      reset()
     }
   }
   keyTarget.addEventListener('keydown', handleKeydown)
