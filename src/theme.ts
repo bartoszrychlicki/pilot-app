@@ -3,6 +3,8 @@ type Theme = 'light' | 'dark'
 const THEME_STORAGE_KEY = 'pilot-theme'
 const DARK_THEME_QUERY = '(prefers-color-scheme: dark)'
 
+// This function is serialized into the bootstrap script via `.toString()`.
+// Keep it self-contained: it must not reference module-level variables or other closures.
 export function resolveTheme(storedTheme: string | null, prefersDark: boolean): Theme {
   if (storedTheme === 'light' || storedTheme === 'dark') {
     return storedTheme
