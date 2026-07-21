@@ -22,9 +22,10 @@ test('renders the changelog open when requested', () => {
   assert.match(renderChangelog(true), /<details id="changelog-details" open>/)
 })
 
-test('persists the changelog state when it is toggled', () => {
+test('persists the changelog state when it is toggled', (t) => {
   let toggleHandler
   let savedOpen
+  const originalLocalStorage = Object.getOwnPropertyDescriptor(globalThis, 'localStorage')
   const details = {
     open: false,
     addEventListener(event, handler) {
@@ -41,6 +42,13 @@ test('persists the changelog state when it is toggled', () => {
   Object.defineProperty(globalThis, 'localStorage', {
     configurable: true,
     value: localStorageMock,
+  })
+  t.after(() => {
+    if (originalLocalStorage) {
+      Object.defineProperty(globalThis, 'localStorage', originalLocalStorage)
+    } else {
+      delete globalThis.localStorage
+    }
   })
   setupChangelog(details)
 
