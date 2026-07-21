@@ -8,6 +8,7 @@ document.querySelector<HTMLDivElement>('#app')!.innerHTML = `
   <h1>Witamy w pilot-app</h1>
   <p>To prosta aplikacja demonstracyjna, w której rozwijamy i prezentujemy kolejne funkcje projektu.</p>
   <div class="counter-group">
+    <button id="decrement" type="button" class="counter counter-step">−</button>
     <button id="counter" type="button" class="counter"></button>
     <button id="reset" type="button" class="counter reset">Reset</button>
   </div>
@@ -27,4 +28,5 @@ ${renderFooter()}
 setupCounter(
   document.querySelector<HTMLButtonElement>('#counter')!,
   document.querySelector<HTMLButtonElement>('#reset')!,
+  document.querySelector<HTMLButtonElement>('#decrement')!,
 )

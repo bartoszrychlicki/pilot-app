@@ -118,6 +118,28 @@ code {
   gap: 8px;
 }
 
+.counter-step {
+  min-width: 2.5rem;
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  .pulse {
+    animation: counter-pulse 150ms ease;
+  }
+}
+
+@keyframes counter-pulse {
+  0% {
+    transform: scale(1);
+  }
+  50% {
+    transform: scale(1.08);
+  }
+  100% {
+    transform: scale(1);
+  }
+}
+
 #app {
   width: 1126px;
   max-width: 100%;
