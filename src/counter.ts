@@ -3,8 +3,15 @@ export function setupCounter(element: HTMLButtonElement, resetElement: HTMLButto
   const setCounter = (count: number) => {
     counter = count
     element.innerHTML = `Licznik: ${counter}`
+    resetElement.disabled = counter === 0
   }
-  element.addEventListener('click', () => setCounter(counter + 1))
+  element.addEventListener('click', () => {
+    element.classList.add('counter--pulse')
+    element.addEventListener('animationend', () => element.classList.remove('counter--pulse'), {
+      once: true,
+    })
+    setCounter(counter + 1)
+  })
   resetElement.addEventListener('click', () => setCounter(0))
   setCounter(0)
 }
