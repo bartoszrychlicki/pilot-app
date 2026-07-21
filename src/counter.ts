@@ -13,7 +13,11 @@ function readStoredCounter(): number {
   }
 }
 
-export function setupCounter(element: HTMLButtonElement, resetElement: HTMLButtonElement) {
+export function setupCounter(
+  element: HTMLButtonElement,
+  resetElement: HTMLButtonElement,
+  keyTarget: EventTarget = document,
+) {
   let counter = 0
   const setCounter = (count: number) => {
     counter = count
@@ -27,13 +31,34 @@ export function setupCounter(element: HTMLButtonElement, resetElement: HTMLButto
     element.innerHTML = `Licznik: ${counter}`
     resetElement.disabled = counter === 0
   }
-  element.addEventListener('animationend', () => element.classList.remove('counter--pulse'))
-  element.addEventListener('click', () => {
+  const increment = () => {
     element.classList.remove('counter--pulse')
     void element.offsetWidth
     element.classList.add('counter--pulse')
     setCounter(counter + 1)
-  })
+  }
+  element.addEventListener('animationend', () => element.classList.remove('counter--pulse'))
+  element.addEventListener('click', increment)
   resetElement.addEventListener('click', () => setCounter(0))
+  keyTarget.addEventListener('keydown', (event) => {
+    const keyboardEvent = event as KeyboardEvent
+    const target = keyboardEvent.target as HTMLElement | null
+
+    if (
+      target?.tagName === 'INPUT' ||
+      target?.tagName === 'TEXTAREA' ||
+      target?.isContentEditable === true
+    ) {
+      return
+    }
+
+    if (keyboardEvent.key === '+' || keyboardEvent.key === '=') {
+      keyboardEvent.preventDefault()
+      increment()
+    } else if (keyboardEvent.key === 'r' || keyboardEvent.key === 'R') {
+      keyboardEvent.preventDefault()
+      setCounter(0)
+    }
+  })
   setCounter(readStoredCounter())
 }

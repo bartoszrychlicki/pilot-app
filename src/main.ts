@@ -16,6 +16,7 @@ ${renderThemeToggle()}
     <button id="counter" type="button" class="counter" aria-live="polite"></button>
     <button id="reset" type="button" class="counter reset">Reset</button>
   </div>
+  <p class="counter-hint">Skróty: + / = zwiększ, r reset (nieaktywne w polach tekstowych)</p>
 </section>
 
 <div class="ticks"></div>

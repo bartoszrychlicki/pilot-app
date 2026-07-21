@@ -216,6 +216,12 @@ code {
   gap: 8px;
 }
 
+.counter-hint {
+  font-size: 14px;
+  color: var(--text);
+  margin-top: 4px;
+}
+
 #app {
   width: 1126px;
   max-width: 100%;
