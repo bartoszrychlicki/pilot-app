@@ -2,6 +2,7 @@ import './style.css'
 import { renderChangelog } from './changelog.ts'
 import { setupCounter } from './counter.ts'
 import { renderFooter } from './footer.ts'
+import { setupStats } from './stats.ts'
 import { applyTheme, getPreferredTheme, renderThemeToggle, setupThemeToggle } from './theme.ts'
 
 applyTheme(getPreferredTheme())
@@ -16,6 +17,7 @@ ${renderThemeToggle()}
     <button id="counter" type="button" class="counter"></button>
     <button id="reset" type="button" class="counter reset">Reset</button>
   </div>
+  <p id="stats-panel" class="stats-panel"></p>
 </section>
 
 <div class="ticks"></div>
@@ -32,6 +34,12 @@ ${renderFooter()}
 setupCounter(
   document.querySelector<HTMLButtonElement>('#counter')!,
   document.querySelector<HTMLButtonElement>('#reset')!,
+)
+
+setupStats(
+  document.querySelector<HTMLButtonElement>('#counter')!,
+  document.querySelector<HTMLButtonElement>('#reset')!,
+  document.querySelector<HTMLElement>('#stats-panel')!,
 )
 
 setupThemeToggle(document.querySelector<HTMLButtonElement>('#theme-toggle')!)

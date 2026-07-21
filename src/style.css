@@ -197,6 +197,11 @@ code {
   gap: 8px;
 }
 
+.stats-panel {
+  font-size: 14px;
+  color: var(--text);
+}
+
 #app {
   width: 1126px;
   max-width: 100%;
