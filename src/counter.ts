@@ -1,18 +1,26 @@
 const STORAGE_KEY = 'pilot-counter'
 
 function readStoredCounter(): number {
-  const storedCounter = localStorage.getItem(STORAGE_KEY)
-  if (storedCounter === null) return 0
+  try {
+    const storedCounter = localStorage.getItem(STORAGE_KEY)
+    if (storedCounter === null) return 0
 
-  const parsedCounter = parseInt(storedCounter, 10)
-  return Number.isNaN(parsedCounter) ? 0 : parsedCounter
+    const parsedCounter = Number(storedCounter)
+    return Number.isInteger(parsedCounter) && parsedCounter >= 0 ? parsedCounter : 0
+  } catch {
+    return 0
+  }
 }
 
 export function setupCounter(element: HTMLButtonElement, resetElement: HTMLButtonElement) {
   let counter = 0
   const setCounter = (count: number) => {
     counter = count
-    localStorage.setItem(STORAGE_KEY, String(counter))
+    try {
+      localStorage.setItem(STORAGE_KEY, String(counter))
+    } catch {
+      // The counter remains usable when storage is unavailable.
+    }
     element.innerHTML = `Licznik: ${counter}`
   }
   element.addEventListener('click', () => setCounter(counter + 1))
