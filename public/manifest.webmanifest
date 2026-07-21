@@ -1,0 +1,15 @@
+{
+  "name": "pilot-app",
+  "short_name": "pilot",
+  "start_url": "/",
+  "display": "standalone",
+  "theme_color": "#aa3bff",
+  "background_color": "#ffffff",
+  "icons": [
+    {
+      "src": "/favicon.svg",
+      "sizes": "any",
+      "type": "image/svg+xml"
+    }
+  ]
+}
