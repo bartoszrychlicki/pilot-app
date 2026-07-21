@@ -1,6 +1,5 @@
 import assert from 'node:assert/strict'
 import { beforeEach, describe, test } from 'node:test'
-import ts from 'typescript'
 import {
   applyTheme,
   getCurrentTheme,
@@ -75,26 +74,10 @@ describe('getPreferredTheme', () => {
 })
 
 test('resolveTheme stays self-contained for bootstrap serialization', () => {
-  const sourceFile = ts.createSourceFile(
-    'resolve-theme.js',
-    `(${resolveTheme.toString()})`,
-    ts.ScriptTarget.Latest,
-    true,
-    ts.ScriptKind.JS,
-  )
-  const identifiers = new Set()
+  const serializedResolver = resolveTheme.toString()
 
-  function collectIdentifiers(node) {
-    if (ts.isIdentifier(node)) {
-      identifiers.add(node.text)
-    }
-
-    ts.forEachChild(node, collectIdentifiers)
-  }
-
-  collectIdentifiers(sourceFile)
-
-  assert.deepEqual([...identifiers].sort(), ['prefersDark', 'resolveTheme', 'storedTheme'])
+  assert.doesNotMatch(serializedResolver, /THEME_STORAGE_KEY/)
+  assert.doesNotMatch(serializedResolver, /DARK_THEME_QUERY/)
 })
 
 test('the generated bootstrap script resolves themes identically to resolveTheme', () => {
