@@ -18,7 +18,7 @@ ${renderThemeToggle()}
     <button id="reset" type="button" class="counter reset">Reset</button>
   </div>
   <p class="counter-hint">Skróty: + / = zwiększ, r reset (nieaktywne w polach tekstowych)</p>
-  <p class="stats-panel" id="stats-panel"></p>
+  <div class="stats-panel" id="stats-panel"></div>
 </section>
 
 <div class="ticks"></div>
@@ -48,12 +48,19 @@ function setupStats(panel: HTMLElement) {
   }
 
   render()
-  setInterval(render, 1000)
+  const intervalId = window.setInterval(render, 1000)
 
-  return { onIncrement, onReset }
+  return {
+    onIncrement,
+    onReset,
+    dispose: () => window.clearInterval(intervalId),
+  }
 }
 
 const statsHandlers = setupStats(document.querySelector<HTMLElement>('#stats-panel')!)
+window.addEventListener('pagehide', (event) => {
+  if (!event.persisted) statsHandlers.dispose()
+})
 setupCounter(
   document.querySelector<HTMLButtonElement>('#counter')!,
   document.querySelector<HTMLButtonElement>('#reset')!,
