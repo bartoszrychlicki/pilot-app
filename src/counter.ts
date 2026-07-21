@@ -35,11 +35,11 @@ export function setupCounter(
   }
   const listeners = new Set<(state: CounterState) => void>()
 
-  const setCounter = (value: number, sessionClicks = 0, sessionResets = 0) => {
+  const setCounter = (value: number, clicksDelta = 0, resetsDelta = 0) => {
     state = {
       value,
-      sessionClicks: state.sessionClicks + sessionClicks,
-      sessionResets: state.sessionResets + sessionResets,
+      sessionClicks: state.sessionClicks + clicksDelta,
+      sessionResets: state.sessionResets + resetsDelta,
     }
     try {
       localStorage.setItem(STORAGE_KEY, String(state.value))
@@ -48,7 +48,7 @@ export function setupCounter(
         console.warn('Failed to save the counter to localStorage.', error)
       }
     }
-    element.innerHTML = `Licznik: ${state.value}`
+    element.textContent = `Licznik: ${state.value}`
     listeners.forEach((listener) => listener(state))
   }
   element.addEventListener('click', () => setCounter(state.value + 1, 1))
