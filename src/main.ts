@@ -2,6 +2,7 @@ import './style.css'
 import { renderChangelog } from './changelog.ts'
 import { setupCounter } from './counter.ts'
 import { renderFooter } from './footer.ts'
+import { createSessionStats, formatDuration } from './stats.ts'
 import { applyTheme, getPreferredTheme, renderThemeToggle, setupThemeToggle } from './theme.ts'
 
 applyTheme(getPreferredTheme())
@@ -17,6 +18,7 @@ ${renderThemeToggle()}
     <button id="reset" type="button" class="counter reset">Reset</button>
   </div>
   <p class="counter-hint">Skróty: + / = zwiększ, r reset (nieaktywne w polach tekstowych)</p>
+  <div class="stats-panel" id="stats-panel"></div>
 </section>
 
 <div class="ticks"></div>
@@ -30,9 +32,40 @@ ${renderThemeToggle()}
 ${renderFooter()}
 `
 
+function setupStats(panel: HTMLElement) {
+  const stats = createSessionStats()
+  const render = () => {
+    panel.textContent = `Kliknięcia: ${stats.getClicks()} · Resety: ${stats.getResets()} · Czas sesji: ${formatDuration(stats.getElapsedMs())}`
+  }
+
+  const onIncrement = () => {
+    stats.recordIncrement()
+    render()
+  }
+  const onReset = () => {
+    stats.recordReset()
+    render()
+  }
+
+  render()
+  const intervalId = window.setInterval(render, 1000)
+
+  return {
+    onIncrement,
+    onReset,
+    dispose: () => window.clearInterval(intervalId),
+  }
+}
+
+const statsHandlers = setupStats(document.querySelector<HTMLElement>('#stats-panel')!)
+window.addEventListener('pagehide', (event) => {
+  if (!event.persisted) statsHandlers.dispose()
+})
 setupCounter(
   document.querySelector<HTMLButtonElement>('#counter')!,
   document.querySelector<HTMLButtonElement>('#reset')!,
+  document,
+  statsHandlers,
 )
 
 setupThemeToggle(document.querySelector<HTMLButtonElement>('#theme-toggle')!)

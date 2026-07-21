@@ -222,6 +222,16 @@ code {
   margin-top: 4px;
 }
 
+.stats-panel {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 0.5rem;
+  margin-top: 4px;
+  color: var(--text);
+  font-size: 14px;
+}
+
 #app {
   width: 1126px;
   max-width: 100%;
