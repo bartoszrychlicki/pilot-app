@@ -1,6 +1,6 @@
 type Theme = 'light' | 'dark'
 
-export const THEME_STORAGE_KEY = 'pilot-theme'
+const THEME_STORAGE_KEY = 'pilot-theme'
 const DARK_THEME_QUERY = '(prefers-color-scheme: dark)'
 
 export function resolveTheme(storedTheme: string | null, prefersDark: boolean): Theme {
@@ -19,13 +19,7 @@ export function getPreferredTheme(): Theme {
 }
 
 export function getThemeBootstrapScript(): string {
-  return [
-    '(function(){',
-    `var storedTheme=localStorage.getItem(${JSON.stringify(THEME_STORAGE_KEY)});`,
-    `var theme=(${resolveTheme.toString()})(storedTheme,matchMedia(${JSON.stringify(DARK_THEME_QUERY)}).matches);`,
-    'document.documentElement.dataset.theme=theme',
-    '})()',
-  ].join('')
+  return `(function(){var storedTheme=localStorage.getItem(${JSON.stringify(THEME_STORAGE_KEY)});var prefersDark=matchMedia(${JSON.stringify(DARK_THEME_QUERY)}).matches;var theme=storedTheme==='light'||storedTheme==='dark'?storedTheme:prefersDark?'dark':'light';document.documentElement.dataset.theme=theme})()`
 }
 
 export function applyTheme(theme: Theme): void {

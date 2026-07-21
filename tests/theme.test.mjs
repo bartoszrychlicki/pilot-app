@@ -5,6 +5,7 @@ import {
   getCurrentTheme,
   getPreferredTheme,
   getThemeBootstrapScript,
+  renderThemeToggle,
   setupThemeToggle,
 } from '../src/theme.ts'
 
@@ -71,7 +72,7 @@ describe('getPreferredTheme', () => {
   })
 })
 
-test('the generated bootstrap script validates storage with the shared resolver', () => {
+test('the generated bootstrap script validates storage', () => {
   storedTheme = 'legacy-theme'
   prefersDark = true
   const bootstrapDocument = { documentElement: { dataset: {} } }
@@ -85,6 +86,26 @@ test('the generated bootstrap script validates storage with the shared resolver'
   runBootstrap(localStorageMock, () => ({ matches: prefersDark }), bootstrapDocument)
 
   assert.equal(bootstrapDocument.documentElement.dataset.theme, 'dark')
+})
+
+describe('renderThemeToggle', () => {
+  test('renders the light theme icon and dark theme action', () => {
+    applyTheme('light')
+
+    assert.equal(
+      renderThemeToggle(),
+      '<button id="theme-toggle" type="button" class="theme-toggle" aria-label="Przełącz na tryb ciemny">☀️</button>',
+    )
+  })
+
+  test('renders the dark theme icon and light theme action', () => {
+    applyTheme('dark')
+
+    assert.equal(
+      renderThemeToggle(),
+      '<button id="theme-toggle" type="button" class="theme-toggle" aria-label="Przełącz na tryb jasny">🌙</button>',
+    )
+  })
 })
 
 test('getCurrentTheme uses light as the safe fallback', () => {
