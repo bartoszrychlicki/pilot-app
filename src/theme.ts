@@ -1,19 +1,39 @@
-const THEME_KEY = 'pilot-theme'
-
 type Theme = 'light' | 'dark'
 
-export function getPreferredTheme(): Theme {
-  const storedTheme = localStorage.getItem(THEME_KEY)
+export const THEME_STORAGE_KEY = 'pilot-theme'
+const DARK_THEME_QUERY = '(prefers-color-scheme: dark)'
 
+export function resolveTheme(storedTheme: string | null, prefersDark: boolean): Theme {
   if (storedTheme === 'light' || storedTheme === 'dark') {
     return storedTheme
   }
 
-  return window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light'
+  return prefersDark ? 'dark' : 'light'
+}
+
+export function getPreferredTheme(): Theme {
+  return resolveTheme(
+    localStorage.getItem(THEME_STORAGE_KEY),
+    window.matchMedia(DARK_THEME_QUERY).matches,
+  )
+}
+
+export function getThemeBootstrapScript(): string {
+  return [
+    '(function(){',
+    `var storedTheme=localStorage.getItem(${JSON.stringify(THEME_STORAGE_KEY)});`,
+    `var theme=(${resolveTheme.toString()})(storedTheme,matchMedia(${JSON.stringify(DARK_THEME_QUERY)}).matches);`,
+    'document.documentElement.dataset.theme=theme',
+    '})()',
+  ].join('')
 }
 
 export function applyTheme(theme: Theme): void {
   document.documentElement.dataset.theme = theme
+}
+
+export function getCurrentTheme(): Theme {
+  return document.documentElement.dataset.theme === 'dark' ? 'dark' : 'light'
 }
 
 function updateThemeToggle(button: HTMLButtonElement, theme: Theme): void {
@@ -25,7 +45,7 @@ function updateThemeToggle(button: HTMLButtonElement, theme: Theme): void {
 }
 
 export function renderThemeToggle(): string {
-  const theme = document.documentElement.dataset.theme === 'dark' ? 'dark' : 'light'
+  const theme = getCurrentTheme()
   const icon = theme === 'dark' ? '🌙' : '☀️'
   const label = theme === 'dark' ? 'Przełącz na tryb jasny' : 'Przełącz na tryb ciemny'
 
@@ -34,11 +54,11 @@ export function renderThemeToggle(): string {
 
 export function setupThemeToggle(button: HTMLButtonElement): void {
   button.addEventListener('click', () => {
-    const currentTheme = document.documentElement.dataset.theme === 'dark' ? 'dark' : 'light'
+    const currentTheme = getCurrentTheme()
     const nextTheme = currentTheme === 'dark' ? 'light' : 'dark'
 
     applyTheme(nextTheme)
-    localStorage.setItem(THEME_KEY, nextTheme)
+    localStorage.setItem(THEME_STORAGE_KEY, nextTheme)
     updateThemeToggle(button, nextTheme)
   })
 }
