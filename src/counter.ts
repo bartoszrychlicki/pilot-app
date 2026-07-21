@@ -4,9 +4,11 @@ export function setupCounter(
   decrementElement: HTMLButtonElement,
 ) {
   let counter = 0
-  const setCounter = (count: number) => {
+  const setCounter = (count: number, shouldPulse = true) => {
     counter = count
     element.textContent = `Licznik: ${counter}`
+    if (!shouldPulse) return
+
     element.classList.remove('pulse')
     void element.offsetWidth
     element.classList.add('pulse')
@@ -14,5 +16,5 @@ export function setupCounter(
   element.addEventListener('click', () => setCounter(counter + 1))
   decrementElement.addEventListener('click', () => setCounter(Math.max(0, counter - 1)))
   resetElement.addEventListener('click', () => setCounter(0))
-  setCounter(0)
+  setCounter(0, false)
 }
