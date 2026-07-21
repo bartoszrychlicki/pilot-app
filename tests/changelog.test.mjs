@@ -1,7 +1,7 @@
 import assert from 'node:assert/strict'
 import test from 'node:test'
 
-import { renderChangelog, resolveChangelogOpen } from '../src/changelog.ts'
+import { renderChangelog, resolveChangelogOpen, setupChangelog } from '../src/changelog.ts'
 
 test('resolves the persisted changelog state', () => {
   assert.equal(resolveChangelogOpen(null), false)
@@ -20,6 +20,34 @@ test('renders the changelog collapsed by default', () => {
 
 test('renders the changelog open when requested', () => {
   assert.match(renderChangelog(true), /<details id="changelog-details" open>/)
+})
+
+test('persists the changelog state when it is toggled', () => {
+  let toggleHandler
+  let savedOpen
+  const details = {
+    open: false,
+    addEventListener(event, handler) {
+      assert.equal(event, 'toggle')
+      toggleHandler = handler
+    },
+  }
+  const localStorageMock = {
+    setItem(key, value) {
+      assert.equal(key, 'pilot-changelog-open')
+      savedOpen = value
+    },
+  }
+  Object.defineProperty(globalThis, 'localStorage', {
+    configurable: true,
+    value: localStorageMock,
+  })
+  setupChangelog(details)
+
+  details.open = true
+  toggleHandler()
+
+  assert.equal(savedOpen, 'true')
 })
 
 test('renders the BAR-96 through BAR-106 changelog entries in order', () => {
