@@ -16,9 +16,12 @@ function readStoredCounter(): number {
 export function setupCounter(
   element: HTMLButtonElement,
   resetElement: HTMLButtonElement,
+  copyElement: HTMLButtonElement,
+  feedbackElement: HTMLElement,
   keyTarget: EventTarget = document,
 ) {
   let counter = 0
+  let copyFeedbackTimer: ReturnType<typeof setTimeout> | undefined
   const setCounter = (count: number) => {
     counter = count
     try {
@@ -40,6 +43,24 @@ export function setupCounter(
   element.addEventListener('animationend', () => element.classList.remove('counter--pulse'))
   element.addEventListener('click', increment)
   resetElement.addEventListener('click', () => setCounter(0))
+  copyElement.addEventListener('click', () => {
+    navigator.clipboard
+      .writeText(String(counter))
+      .then(() => {
+        feedbackElement.textContent = 'Skopiowano!'
+        if (copyFeedbackTimer !== undefined) {
+          clearTimeout(copyFeedbackTimer)
+        }
+        copyFeedbackTimer = setTimeout(() => {
+          feedbackElement.textContent = ''
+        }, 2000)
+      })
+      .catch((error) => {
+        if (import.meta.env?.DEV) {
+          console.warn('Failed to copy the counter value.', error)
+        }
+      })
+  })
   const handleKeydown = (event: Event) => {
     const keyboardEvent = event as KeyboardEvent
     const target = keyboardEvent.target as HTMLElement | null
