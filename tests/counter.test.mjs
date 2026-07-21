@@ -242,3 +242,41 @@ test('keeps the confirmation visible for two seconds after the latest copy', asy
   t.mock.timers.tick(1)
   assert.equal(elements.feedbackElement.textContent, '')
 })
+
+test('shows a copy error and clears it after two seconds', async (t) => {
+  t.mock.timers.enable({ apis: ['setTimeout'] })
+  const storage = createMemoryStorage('3')
+  const elements = createCounterElements()
+
+  withNavigator(
+    {
+      clipboard: {
+        async writeText() {
+          throw new Error('clipboard unavailable')
+        },
+      },
+    },
+    () => {
+      withLocalStorage(storage, () => {
+        setupCounter(
+          elements.counterButton,
+          elements.resetButton,
+          elements.copyButton,
+          elements.feedbackElement,
+        )
+        elements.copyButton.click()
+      })
+    },
+  )
+
+  await Promise.resolve()
+  await Promise.resolve()
+
+  assert.equal(elements.feedbackElement.textContent, 'Nie udało się skopiować.')
+
+  t.mock.timers.tick(1999)
+  assert.equal(elements.feedbackElement.textContent, 'Nie udało się skopiować.')
+
+  t.mock.timers.tick(1)
+  assert.equal(elements.feedbackElement.textContent, '')
+})

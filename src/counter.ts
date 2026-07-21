@@ -21,6 +21,13 @@ export function setupCounter(
 ) {
   let counter = 0
   let feedbackTimer: ReturnType<typeof setTimeout> | undefined
+  const showFeedback = (message: string) => {
+    feedbackElement.textContent = message
+    if (feedbackTimer !== undefined) clearTimeout(feedbackTimer)
+    feedbackTimer = setTimeout(() => {
+      feedbackElement.textContent = ''
+    }, 2000)
+  }
   const setCounter = (count: number) => {
     counter = count
     try {
@@ -45,13 +52,10 @@ export function setupCounter(
     navigator.clipboard
       .writeText(String(counter))
       .then(() => {
-        feedbackElement.textContent = 'Skopiowano!'
-        if (feedbackTimer !== undefined) clearTimeout(feedbackTimer)
-        feedbackTimer = setTimeout(() => {
-          feedbackElement.textContent = ''
-        }, 2000)
+        showFeedback('Skopiowano!')
       })
       .catch((error) => {
+        showFeedback('Nie udało się skopiować.')
         if (import.meta.env?.DEV) {
           console.warn('Failed to copy the counter value.', error)
         }

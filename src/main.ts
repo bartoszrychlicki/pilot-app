@@ -17,7 +17,7 @@ ${renderThemeToggle()}
     <button id="copy" type="button" class="counter copy">Kopiuj</button>
     <button id="reset" type="button" class="counter reset">Reset</button>
   </div>
-  <span id="copy-feedback" class="copy-feedback" role="status" aria-live="polite"></span>
+  <span id="copy-feedback" class="copy-feedback" role="status"></span>
 </section>
 
 <div class="ticks"></div>
