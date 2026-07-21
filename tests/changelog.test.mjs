@@ -1,7 +1,26 @@
 import assert from 'node:assert/strict'
 import test from 'node:test'
 
-import { renderChangelog } from '../src/changelog.ts'
+import { renderChangelog, resolveChangelogOpen } from '../src/changelog.ts'
+
+test('resolves the persisted changelog state', () => {
+  assert.equal(resolveChangelogOpen(null), false)
+  assert.equal(resolveChangelogOpen('true'), true)
+  assert.equal(resolveChangelogOpen('false'), false)
+  assert.equal(resolveChangelogOpen('garbage'), false)
+})
+
+test('renders the changelog collapsed by default', () => {
+  const changelog = renderChangelog(false)
+
+  assert.match(changelog, /<details id="changelog-details">/)
+  assert.match(changelog, /<summary>Dokonane zmiany w projekcie<\/summary>/)
+  assert.doesNotMatch(changelog, /<details[^>]* open/)
+})
+
+test('renders the changelog open when requested', () => {
+  assert.match(renderChangelog(true), /<details id="changelog-details" open>/)
+})
 
 test('renders the BAR-96 through BAR-106 changelog entries in order', () => {
   const changelog = renderChangelog()
