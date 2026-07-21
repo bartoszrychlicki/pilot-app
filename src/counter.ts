@@ -13,8 +13,14 @@ function readStoredCounter(): number {
   }
 }
 
-export function setupCounter(element: HTMLButtonElement, resetElement: HTMLButtonElement) {
+export function setupCounter(
+  element: HTMLButtonElement,
+  resetElement: HTMLButtonElement,
+  copyElement: HTMLButtonElement,
+  feedbackElement: HTMLElement,
+) {
   let counter = 0
+  let feedbackTimer: ReturnType<typeof setTimeout> | undefined
   const setCounter = (count: number) => {
     counter = count
     try {
@@ -35,5 +41,21 @@ export function setupCounter(element: HTMLButtonElement, resetElement: HTMLButto
     setCounter(counter + 1)
   })
   resetElement.addEventListener('click', () => setCounter(0))
+  copyElement.addEventListener('click', () => {
+    navigator.clipboard
+      .writeText(String(counter))
+      .then(() => {
+        feedbackElement.textContent = 'Skopiowano!'
+        if (feedbackTimer !== undefined) clearTimeout(feedbackTimer)
+        feedbackTimer = setTimeout(() => {
+          feedbackElement.textContent = ''
+        }, 2000)
+      })
+      .catch((error) => {
+        if (import.meta.env?.DEV) {
+          console.warn('Failed to copy the counter value.', error)
+        }
+      })
+  })
   setCounter(readStoredCounter())
 }

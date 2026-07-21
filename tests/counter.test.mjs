@@ -19,6 +19,10 @@ class FakeButton {
   }
 }
 
+class FakeElement {
+  textContent = ''
+}
+
 function withLocalStorage(localStorage, callback) {
   const originalDescriptor = Object.getOwnPropertyDescriptor(globalThis, 'localStorage')
   Object.defineProperty(globalThis, 'localStorage', {
@@ -53,14 +57,40 @@ function createMemoryStorage(initialValue = null) {
   }
 }
 
+function withNavigator(navigator, callback) {
+  const originalDescriptor = Object.getOwnPropertyDescriptor(globalThis, 'navigator')
+  Object.defineProperty(globalThis, 'navigator', {
+    configurable: true,
+    value: navigator,
+  })
+
+  try {
+    return callback()
+  } finally {
+    if (originalDescriptor) {
+      Object.defineProperty(globalThis, 'navigator', originalDescriptor)
+    } else {
+      delete globalThis.navigator
+    }
+  }
+}
+
+function createCounterElements() {
+  return {
+    counterButton: new FakeButton(),
+    resetButton: new FakeButton(),
+    copyButton: new FakeButton(),
+    feedbackElement: new FakeElement(),
+  }
+}
+
 test('loads the stored counter and persists increment and reset', () => {
   const storage = createMemoryStorage('7')
 
   withLocalStorage(storage, () => {
-    const counterButton = new FakeButton()
-    const resetButton = new FakeButton()
+    const { counterButton, resetButton, copyButton, feedbackElement } = createCounterElements()
 
-    setupCounter(counterButton, resetButton)
+    setupCounter(counterButton, resetButton, copyButton, feedbackElement)
     assert.equal(counterButton.innerHTML, 'Licznik: 7')
 
     counterButton.click()
@@ -79,8 +109,8 @@ test('falls back to zero for missing or invalid decimal integer values', async (
       const storage = createMemoryStorage(storedValue)
 
       withLocalStorage(storage, () => {
-        const counterButton = new FakeButton()
-        setupCounter(counterButton, new FakeButton())
+        const { counterButton, resetButton, copyButton, feedbackElement } = createCounterElements()
+        setupCounter(counterButton, resetButton, copyButton, feedbackElement)
 
         assert.equal(counterButton.innerHTML, 'Licznik: 0')
         assert.equal(storage.value(), '0')
@@ -98,9 +128,11 @@ test('starts at zero when reading localStorage throws', () => {
   }
 
   withLocalStorage(storage, () => {
-    const counterButton = new FakeButton()
+    const { counterButton, resetButton, copyButton, feedbackElement } = createCounterElements()
 
-    assert.doesNotThrow(() => setupCounter(counterButton, new FakeButton()))
+    assert.doesNotThrow(() =>
+      setupCounter(counterButton, resetButton, copyButton, feedbackElement),
+    )
     assert.equal(counterButton.innerHTML, 'Licznik: 0')
   })
 })
@@ -116,10 +148,11 @@ test('keeps updating the counter when writing localStorage throws', () => {
   }
 
   withLocalStorage(storage, () => {
-    const counterButton = new FakeButton()
-    const resetButton = new FakeButton()
+    const { counterButton, resetButton, copyButton, feedbackElement } = createCounterElements()
 
-    assert.doesNotThrow(() => setupCounter(counterButton, resetButton))
+    assert.doesNotThrow(() =>
+      setupCounter(counterButton, resetButton, copyButton, feedbackElement),
+    )
     assert.equal(counterButton.innerHTML, 'Licznik: 0')
 
     assert.doesNotThrow(() => counterButton.click())
@@ -128,4 +161,84 @@ test('keeps updating the counter when writing localStorage throws', () => {
     assert.doesNotThrow(() => resetButton.click())
     assert.equal(counterButton.innerHTML, 'Licznik: 0')
   })
+})
+
+test('copies the current counter value and clears the confirmation after two seconds', async (t) => {
+  t.mock.timers.enable({ apis: ['setTimeout'] })
+  const copiedValues = []
+  const storage = createMemoryStorage('5')
+  const elements = createCounterElements()
+
+  withNavigator(
+    {
+      clipboard: {
+        async writeText(value) {
+          copiedValues.push(value)
+        },
+      },
+    },
+    () => {
+      withLocalStorage(storage, () => {
+        setupCounter(
+          elements.counterButton,
+          elements.resetButton,
+          elements.copyButton,
+          elements.feedbackElement,
+        )
+        elements.counterButton.click()
+        elements.counterButton.click()
+        elements.copyButton.click()
+      })
+    },
+  )
+
+  await Promise.resolve()
+  await Promise.resolve()
+
+  assert.deepEqual(copiedValues, ['7'])
+  assert.equal(elements.feedbackElement.textContent, 'Skopiowano!')
+
+  t.mock.timers.tick(1999)
+  assert.equal(elements.feedbackElement.textContent, 'Skopiowano!')
+
+  t.mock.timers.tick(1)
+  assert.equal(elements.feedbackElement.textContent, '')
+})
+
+test('keeps the confirmation visible for two seconds after the latest copy', async (t) => {
+  t.mock.timers.enable({ apis: ['setTimeout'] })
+  const storage = createMemoryStorage()
+  const elements = createCounterElements()
+
+  withNavigator(
+    { clipboard: { writeText: async () => {} } },
+    () => {
+      withLocalStorage(storage, () => {
+        setupCounter(
+          elements.counterButton,
+          elements.resetButton,
+          elements.copyButton,
+          elements.feedbackElement,
+        )
+        elements.copyButton.click()
+      })
+    },
+  )
+
+  await Promise.resolve()
+  await Promise.resolve()
+  t.mock.timers.tick(1000)
+
+  withNavigator({ clipboard: { writeText: async () => {} } }, () => elements.copyButton.click())
+  await Promise.resolve()
+  await Promise.resolve()
+
+  t.mock.timers.tick(1000)
+  assert.equal(elements.feedbackElement.textContent, 'Skopiowano!')
+
+  t.mock.timers.tick(999)
+  assert.equal(elements.feedbackElement.textContent, 'Skopiowano!')
+
+  t.mock.timers.tick(1)
+  assert.equal(elements.feedbackElement.textContent, '')
 })

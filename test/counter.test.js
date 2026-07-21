@@ -45,13 +45,19 @@ class FakeButton extends EventTarget {
   }
 }
 
+class FakeElement {
+  textContent = ''
+}
+
 function createCounter() {
   const counter = new FakeButton()
   const reset = new FakeButton()
+  const copy = new FakeButton()
+  const feedback = new FakeElement()
 
-  setupCounter(counter, reset)
+  setupCounter(counter, reset, copy, feedback)
 
-  return { counter, reset }
+  return { counter, reset, copy, feedback }
 }
 
 test('reset is disabled only when the counter equals zero', () => {

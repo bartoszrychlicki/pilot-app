@@ -216,6 +216,13 @@ code {
   gap: 8px;
 }
 
+.copy-feedback {
+  min-height: 1.45em;
+  margin-top: 8px;
+  color: var(--accent);
+  font-size: 13px;
+}
+
 #app {
   width: 1126px;
   max-width: 100%;
