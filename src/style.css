@@ -13,6 +13,7 @@
 
   --sans: system-ui, 'Segoe UI', Roboto, sans-serif;
   --heading: system-ui, 'Segoe UI', Roboto, sans-serif;
+  --font-logo: 'Space Grotesk', var(--heading);
   --mono: ui-monospace, Consolas, monospace;
 
   font: 18px/145% var(--sans);
@@ -77,6 +78,19 @@ h2 {
 }
 p {
   margin: 0;
+}
+
+.logo {
+  font-family: var(--font-logo);
+  font-weight: 700;
+  font-size: 22px;
+  letter-spacing: -0.44px;
+  color: var(--accent);
+  margin-bottom: 4px;
+
+  @media (max-width: 1024px) {
+    font-size: 20px;
+  }
 }
 
 code,
