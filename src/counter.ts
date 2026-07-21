@@ -40,9 +40,13 @@ export function setupCounter(
   element.addEventListener('animationend', () => element.classList.remove('counter--pulse'))
   element.addEventListener('click', increment)
   resetElement.addEventListener('click', () => setCounter(0))
-  keyTarget.addEventListener('keydown', (event) => {
+  const handleKeydown = (event: Event) => {
     const keyboardEvent = event as KeyboardEvent
     const target = keyboardEvent.target as HTMLElement | null
+
+    if (keyboardEvent.ctrlKey || keyboardEvent.metaKey || keyboardEvent.altKey) {
+      return
+    }
 
     if (
       target?.tagName === 'INPUT' ||
@@ -59,6 +63,9 @@ export function setupCounter(
       keyboardEvent.preventDefault()
       setCounter(0)
     }
-  })
+  }
+  keyTarget.addEventListener('keydown', handleKeydown)
   setCounter(readStoredCounter())
+
+  return () => keyTarget.removeEventListener('keydown', handleKeydown)
 }

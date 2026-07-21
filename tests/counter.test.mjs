@@ -26,11 +26,18 @@ class FakeEventTarget {
     this.listeners.set(event, listener)
   }
 
-  keydown(key, target = this) {
+  removeEventListener(event, listener) {
+    if (this.listeners.get(event) === listener) {
+      this.listeners.delete(event)
+    }
+  }
+
+  keydown(key, target = this, modifiers = {}) {
     let defaultPrevented = false
     this.listeners.get('keydown')?.({
       key,
       target,
+      ...modifiers,
       preventDefault() {
         defaultPrevented = true
       },
@@ -200,6 +207,32 @@ test('shortcuts are ignored when the event target is a text field', () => {
 
     assert.equal(keyTarget.keydown('+', { tagName: 'INPUT' }), false)
     assert.equal(counterButton.innerHTML, 'Licznik: 5')
+  })
+})
+
+test('shortcuts are ignored when Ctrl, Cmd, or Alt is pressed', () => {
+  withLocalStorage(createMemoryStorage('5'), () => {
+    const counterButton = new FakeButton()
+    const keyTarget = new FakeEventTarget()
+    setupCounter(counterButton, new FakeButton(), keyTarget)
+
+    assert.equal(keyTarget.keydown('r', keyTarget, { ctrlKey: true }), false)
+    assert.equal(keyTarget.keydown('=', keyTarget, { metaKey: true }), false)
+    assert.equal(keyTarget.keydown('+', keyTarget, { altKey: true }), false)
+    assert.equal(counterButton.innerHTML, 'Licznik: 5')
+  })
+})
+
+test('cleanup removes the keydown listener', () => {
+  withLocalStorage(createMemoryStorage('2'), () => {
+    const counterButton = new FakeButton()
+    const keyTarget = new FakeEventTarget()
+    const cleanup = setupCounter(counterButton, new FakeButton(), keyTarget)
+
+    cleanup()
+
+    assert.equal(keyTarget.keydown('+'), false)
+    assert.equal(counterButton.innerHTML, 'Licznik: 2')
   })
 })
 
