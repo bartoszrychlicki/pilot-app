@@ -6,6 +6,7 @@ export function renderChangelog(): string {
       <li><strong>TEST-3:</strong> Dodano przycisk resetujący licznik.</li>
       <li><strong>TEST-4:</strong> Dodano bieżący rok w stopce.</li>
       <li><strong>BAR-95:</strong> Zastąpiono domyślny ekran Vite ekranem powitalnym.</li>
+      <li><strong>BAR-100:</strong> Dodano logo aplikacji (wordmark) na stronie głównej.</li>
     </ul>
   `
 }
