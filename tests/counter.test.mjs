@@ -70,8 +70,8 @@ test('loads the stored counter and persists increment and reset', () => {
   })
 })
 
-test('falls back to zero for missing, invalid, negative, and fractional values', async (t) => {
-  for (const storedValue of [null, 'not-a-number', '-5', '1.5']) {
+test('falls back to zero for missing or invalid decimal integer values', async (t) => {
+  for (const storedValue of [null, 'not-a-number', '-5', '1.5', ' ', '1e2']) {
     await t.test(String(storedValue), () => {
       const storage = createMemoryStorage(storedValue)
 
