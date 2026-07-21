@@ -1,5 +1,5 @@
 import './style.css'
-import { renderChangelog } from './changelog.ts'
+import { renderChangelog, setupChangelog } from './changelog.ts'
 import { setupCounter } from './counter.ts'
 import { renderFooter } from './footer.ts'
 import { createSessionStats, formatDuration } from './stats.ts'
@@ -69,3 +69,4 @@ setupCounter(
 )
 
 setupThemeToggle(document.querySelector<HTMLButtonElement>('#theme-toggle')!)
+setupChangelog(document.querySelector<HTMLDetailsElement>('#changelog-details')!)

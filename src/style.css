@@ -267,8 +267,45 @@ code {
   text-align: left;
   padding: 32px;
 
-  h2 {
+  summary {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    list-style: none;
+    font-family: var(--heading);
+    font-weight: 500;
+    font-size: 24px;
+    line-height: 118%;
+    letter-spacing: -0.24px;
+    color: var(--text-h);
+    cursor: pointer;
+
+    &::-webkit-details-marker {
+      display: none;
+    }
+
+    &::before {
+      content: '▸';
+      color: var(--accent);
+      transition: transform 0.2s ease;
+    }
+
+    &:focus-visible {
+      outline: 2px solid var(--accent);
+      outline-offset: 2px;
+    }
+
+    @media (max-width: 1024px) {
+      font-size: 20px;
+    }
+  }
+
+  details[open] summary {
     margin-bottom: 16px;
+
+    &::before {
+      transform: rotate(90deg);
+    }
   }
 
   ul {
