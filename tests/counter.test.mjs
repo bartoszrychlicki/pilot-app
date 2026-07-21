@@ -19,6 +19,33 @@ class FakeButton {
   }
 }
 
+class FakeEventTarget {
+  listeners = new Map()
+
+  addEventListener(event, listener) {
+    this.listeners.set(event, listener)
+  }
+
+  removeEventListener(event, listener) {
+    if (this.listeners.get(event) === listener) {
+      this.listeners.delete(event)
+    }
+  }
+
+  keydown(key, target = this, modifiers = {}) {
+    let defaultPrevented = false
+    this.listeners.get('keydown')?.({
+      key,
+      target,
+      ...modifiers,
+      preventDefault() {
+        defaultPrevented = true
+      },
+    })
+    return defaultPrevented
+  }
+}
+
 function withLocalStorage(localStorage, callback) {
   const originalDescriptor = Object.getOwnPropertyDescriptor(globalThis, 'localStorage')
   Object.defineProperty(globalThis, 'localStorage', {
@@ -60,7 +87,7 @@ test('loads the stored counter and persists increment and reset', () => {
     const counterButton = new FakeButton()
     const resetButton = new FakeButton()
 
-    setupCounter(counterButton, resetButton)
+    setupCounter(counterButton, resetButton, new FakeEventTarget())
     assert.equal(counterButton.innerHTML, 'Licznik: 7')
 
     counterButton.click()
@@ -80,7 +107,7 @@ test('falls back to zero for missing or invalid decimal integer values', async (
 
       withLocalStorage(storage, () => {
         const counterButton = new FakeButton()
-        setupCounter(counterButton, new FakeButton())
+        setupCounter(counterButton, new FakeButton(), new FakeEventTarget())
 
         assert.equal(counterButton.innerHTML, 'Licznik: 0')
         assert.equal(storage.value(), '0')
@@ -100,7 +127,9 @@ test('starts at zero when reading localStorage throws', () => {
   withLocalStorage(storage, () => {
     const counterButton = new FakeButton()
 
-    assert.doesNotThrow(() => setupCounter(counterButton, new FakeButton()))
+    assert.doesNotThrow(() =>
+      setupCounter(counterButton, new FakeButton(), new FakeEventTarget()),
+    )
     assert.equal(counterButton.innerHTML, 'Licznik: 0')
   })
 })
@@ -119,7 +148,7 @@ test('keeps updating the counter when writing localStorage throws', () => {
     const counterButton = new FakeButton()
     const resetButton = new FakeButton()
 
-    assert.doesNotThrow(() => setupCounter(counterButton, resetButton))
+    assert.doesNotThrow(() => setupCounter(counterButton, resetButton, new FakeEventTarget()))
     assert.equal(counterButton.innerHTML, 'Licznik: 0')
 
     assert.doesNotThrow(() => counterButton.click())
@@ -127,5 +156,93 @@ test('keeps updating the counter when writing localStorage throws', () => {
 
     assert.doesNotThrow(() => resetButton.click())
     assert.equal(counterButton.innerHTML, 'Licznik: 0')
+  })
+})
+
+test('+ shortcut increments the counter and persists the value', () => {
+  const storage = createMemoryStorage('2')
+
+  withLocalStorage(storage, () => {
+    const counterButton = new FakeButton()
+    const keyTarget = new FakeEventTarget()
+    setupCounter(counterButton, new FakeButton(), keyTarget)
+
+    assert.equal(keyTarget.keydown('+'), true)
+    assert.equal(counterButton.innerHTML, 'Licznik: 3')
+    assert.equal(storage.value(), '3')
+  })
+})
+
+test('= shortcut increments the counter', () => {
+  withLocalStorage(createMemoryStorage(), () => {
+    const counterButton = new FakeButton()
+    const keyTarget = new FakeEventTarget()
+    setupCounter(counterButton, new FakeButton(), keyTarget)
+
+    assert.equal(keyTarget.keydown('='), true)
+    assert.equal(counterButton.innerHTML, 'Licznik: 1')
+  })
+})
+
+test('r and R shortcuts reset the counter', () => {
+  withLocalStorage(createMemoryStorage('4'), () => {
+    const counterButton = new FakeButton()
+    const keyTarget = new FakeEventTarget()
+    setupCounter(counterButton, new FakeButton(), keyTarget)
+
+    assert.equal(keyTarget.keydown('r'), true)
+    assert.equal(counterButton.innerHTML, 'Licznik: 0')
+
+    keyTarget.keydown('+')
+    assert.equal(keyTarget.keydown('R'), true)
+    assert.equal(counterButton.innerHTML, 'Licznik: 0')
+  })
+})
+
+test('shortcuts are ignored when the event target is a text field', () => {
+  withLocalStorage(createMemoryStorage('5'), () => {
+    const counterButton = new FakeButton()
+    const keyTarget = new FakeEventTarget()
+    setupCounter(counterButton, new FakeButton(), keyTarget)
+
+    assert.equal(keyTarget.keydown('+', { tagName: 'INPUT' }), false)
+    assert.equal(counterButton.innerHTML, 'Licznik: 5')
+  })
+})
+
+test('shortcuts are ignored when Ctrl, Cmd, or Alt is pressed', () => {
+  withLocalStorage(createMemoryStorage('5'), () => {
+    const counterButton = new FakeButton()
+    const keyTarget = new FakeEventTarget()
+    setupCounter(counterButton, new FakeButton(), keyTarget)
+
+    assert.equal(keyTarget.keydown('r', keyTarget, { ctrlKey: true }), false)
+    assert.equal(keyTarget.keydown('=', keyTarget, { metaKey: true }), false)
+    assert.equal(keyTarget.keydown('+', keyTarget, { altKey: true }), false)
+    assert.equal(counterButton.innerHTML, 'Licznik: 5')
+  })
+})
+
+test('cleanup removes the keydown listener', () => {
+  withLocalStorage(createMemoryStorage('2'), () => {
+    const counterButton = new FakeButton()
+    const keyTarget = new FakeEventTarget()
+    const cleanup = setupCounter(counterButton, new FakeButton(), keyTarget)
+
+    cleanup()
+
+    assert.equal(keyTarget.keydown('+'), false)
+    assert.equal(counterButton.innerHTML, 'Licznik: 2')
+  })
+})
+
+test('unrecognized shortcuts do not change the counter', () => {
+  withLocalStorage(createMemoryStorage('3'), () => {
+    const counterButton = new FakeButton()
+    const keyTarget = new FakeEventTarget()
+    setupCounter(counterButton, new FakeButton(), keyTarget)
+
+    assert.equal(keyTarget.keydown('a'), false)
+    assert.equal(counterButton.innerHTML, 'Licznik: 3')
   })
 })
