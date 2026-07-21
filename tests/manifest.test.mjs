@@ -15,15 +15,37 @@ test('defines the installable PWA manifest', async () => {
   assert.match(manifest.theme_color, /^#[0-9a-f]{6}$/i)
   assert.match(manifest.background_color, /^#[0-9a-f]{6}$/i)
   assert.ok(Array.isArray(manifest.icons))
-  assert.ok(manifest.icons.length > 0)
-  assert.equal(manifest.icons[0].sizes, 'any')
-  assert.equal(manifest.icons[0].type, 'image/svg+xml')
+  assert.ok(
+    manifest.icons.some(
+      (icon) => icon.sizes === '192x192' && icon.type === 'image/png',
+    ),
+  )
+  assert.ok(
+    manifest.icons.some(
+      (icon) => icon.sizes === '512x512' && icon.type === 'image/png',
+    ),
+  )
+  assert.ok(
+    manifest.icons.some(
+      (icon) => icon.type === 'image/png' && icon.purpose === 'maskable',
+    ),
+  )
 })
 
-test('links the manifest and theme color in the document head', async () => {
+test('links the manifest and mobile installation metadata in the document head', async () => {
   const indexHtml = await readFile(indexUrl, 'utf8')
 
-  assert.ok(indexHtml.includes('rel="manifest"'))
-  assert.ok(indexHtml.includes('href="/manifest.webmanifest"'))
+  assert.match(
+    indexHtml,
+    /<link\b(?=[^>]*\brel=["']manifest["'])(?=[^>]*\bhref=["']\/manifest\.webmanifest["'])[^>]*>/i,
+  )
   assert.ok(indexHtml.includes('name="theme-color"'))
+  assert.match(
+    indexHtml,
+    /<link\b(?=[^>]*\brel=["']apple-touch-icon["'])(?=[^>]*\bhref=["']\/apple-touch-icon\.png["'])[^>]*>/i,
+  )
+  assert.match(
+    indexHtml,
+    /<meta\b(?=[^>]*\bname=["']apple-mobile-web-app-capable["'])(?=[^>]*\bcontent=["']yes["'])[^>]*>/i,
+  )
 })
