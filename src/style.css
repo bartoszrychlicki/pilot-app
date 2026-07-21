@@ -192,6 +192,25 @@ code {
   }
 }
 
+@keyframes pulse {
+  0%,
+  100% {
+    transform: scale(1);
+  }
+  50% {
+    transform: scale(1.08);
+  }
+}
+
+.counter--pulse {
+  animation: pulse 300ms ease;
+}
+
+.counter[disabled] {
+  opacity: 0.4;
+  cursor: not-allowed;
+}
+
 .counter-group {
   display: flex;
   gap: 8px;
