@@ -1,5 +1,16 @@
 const STORAGE_KEY = 'pilot-counter'
 
+export type CounterState = Readonly<{
+  value: number
+  sessionClicks: number
+  sessionResets: number
+}>
+
+export type CounterStore = Readonly<{
+  getState: () => CounterState
+  subscribe: (listener: (state: CounterState) => void) => () => void
+}>
+
 function readStoredCounter(): number {
   try {
     const storedCounter = localStorage.getItem(STORAGE_KEY)
@@ -13,20 +24,43 @@ function readStoredCounter(): number {
   }
 }
 
-export function setupCounter(element: HTMLButtonElement, resetElement: HTMLButtonElement) {
-  let counter = 0
-  const setCounter = (count: number) => {
-    counter = count
+export function setupCounter(
+  element: HTMLButtonElement,
+  resetElement: HTMLButtonElement,
+): CounterStore {
+  let state: CounterState = {
+    value: 0,
+    sessionClicks: 0,
+    sessionResets: 0,
+  }
+  const listeners = new Set<(state: CounterState) => void>()
+
+  const setCounter = (value: number, sessionClicks = 0, sessionResets = 0) => {
+    state = {
+      value,
+      sessionClicks: state.sessionClicks + sessionClicks,
+      sessionResets: state.sessionResets + sessionResets,
+    }
     try {
-      localStorage.setItem(STORAGE_KEY, String(counter))
+      localStorage.setItem(STORAGE_KEY, String(state.value))
     } catch (error) {
       if (import.meta.env?.DEV) {
         console.warn('Failed to save the counter to localStorage.', error)
       }
     }
-    element.innerHTML = `Licznik: ${counter}`
+    element.innerHTML = `Licznik: ${state.value}`
+    listeners.forEach((listener) => listener(state))
   }
-  element.addEventListener('click', () => setCounter(counter + 1))
-  resetElement.addEventListener('click', () => setCounter(0))
+  element.addEventListener('click', () => setCounter(state.value + 1, 1))
+  resetElement.addEventListener('click', () => setCounter(0, 0, 1))
   setCounter(readStoredCounter())
+
+  return {
+    getState: () => state,
+    subscribe: (listener) => {
+      listeners.add(listener)
+      listener(state)
+      return () => listeners.delete(listener)
+    },
+  }
 }

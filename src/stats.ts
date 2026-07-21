@@ -1,3 +1,5 @@
+import type { CounterStore } from './counter.ts'
+
 export function formatElapsed(ms: number): string {
   const totalSeconds = Math.floor(ms / 1000)
   const minutes = Math.floor(totalSeconds / 60)
@@ -7,26 +9,21 @@ export function formatElapsed(ms: number): string {
 }
 
 export function setupStats(
-  counterButton: HTMLButtonElement,
-  resetButton: HTMLButtonElement,
+  counter: CounterStore,
   statsElement: HTMLElement,
 ) {
-  let clicks = 0
-  let resets = 0
   const startedAt = Date.now()
 
   const render = () => {
-    statsElement.innerHTML = `Kliknięcia: ${clicks} · Resety: ${resets} · Czas: ${formatElapsed(Date.now() - startedAt)}`
+    const { sessionClicks, sessionResets } = counter.getState()
+    statsElement.textContent = `Kliknięcia: ${sessionClicks} · Resety: ${sessionResets} · Czas: ${formatElapsed(Date.now() - startedAt)}`
   }
 
-  counterButton.addEventListener('click', () => {
-    clicks++
-    render()
-  })
-  resetButton.addEventListener('click', () => {
-    resets++
-    render()
-  })
-  setInterval(render, 1000)
-  render()
+  const unsubscribe = counter.subscribe(render)
+  const intervalId = setInterval(render, 1000)
+
+  return () => {
+    clearInterval(intervalId)
+    unsubscribe()
+  }
 }

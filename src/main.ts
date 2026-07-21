@@ -31,15 +31,18 @@ ${renderThemeToggle()}
 ${renderFooter()}
 `
 
-setupCounter(
+const counter = setupCounter(
   document.querySelector<HTMLButtonElement>('#counter')!,
   document.querySelector<HTMLButtonElement>('#reset')!,
 )
 
-setupStats(
-  document.querySelector<HTMLButtonElement>('#counter')!,
-  document.querySelector<HTMLButtonElement>('#reset')!,
+const disposeStats = setupStats(
+  counter,
   document.querySelector<HTMLElement>('#stats-panel')!,
 )
+
+if (import.meta.hot) {
+  import.meta.hot.dispose(disposeStats)
+}
 
 setupThemeToggle(document.querySelector<HTMLButtonElement>('#theme-toggle')!)

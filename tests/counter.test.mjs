@@ -57,16 +57,31 @@ test('loads the stored counter and persists increment and reset', () => {
     const counterButton = new FakeButton()
     const resetButton = new FakeButton()
 
-    setupCounter(counterButton, resetButton)
+    const counter = setupCounter(counterButton, resetButton)
     assert.equal(counterButton.innerHTML, 'Licznik: 7')
+    assert.deepEqual(counter.getState(), {
+      value: 7,
+      sessionClicks: 0,
+      sessionResets: 0,
+    })
 
     counterButton.click()
     assert.equal(counterButton.innerHTML, 'Licznik: 8')
     assert.equal(storage.value(), '8')
+    assert.deepEqual(counter.getState(), {
+      value: 8,
+      sessionClicks: 1,
+      sessionResets: 0,
+    })
 
     resetButton.click()
     assert.equal(counterButton.innerHTML, 'Licznik: 0')
     assert.equal(storage.value(), '0')
+    assert.deepEqual(counter.getState(), {
+      value: 0,
+      sessionClicks: 1,
+      sessionResets: 1,
+    })
   })
 })
 

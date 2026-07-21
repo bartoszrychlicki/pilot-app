@@ -3,25 +3,32 @@ import test from 'node:test'
 
 import { formatElapsed, setupStats } from '../src/stats.ts'
 
-class FakeButton {
-  innerHTML = ''
-  listeners = new Map()
+class FakeCounterStore {
+  state = {
+    value: 0,
+    sessionClicks: 0,
+    sessionResets: 0,
+  }
+  listeners = new Set()
 
-  addEventListener(event, listener) {
-    const eventListeners = this.listeners.get(event) ?? []
-    eventListeners.push(listener)
-    this.listeners.set(event, eventListeners)
+  getState() {
+    return this.state
   }
 
-  click() {
-    for (const listener of this.listeners.get('click') ?? []) {
-      listener()
-    }
+  subscribe(listener) {
+    this.listeners.add(listener)
+    listener(this.state)
+    return () => this.listeners.delete(listener)
+  }
+
+  update(state) {
+    this.state = { ...this.state, ...state }
+    this.listeners.forEach((listener) => listener(this.state))
   }
 }
 
 class FakeElement {
-  innerHTML = ''
+  textContent = ''
 }
 
 test('formats elapsed time as zero-padded minutes and seconds', () => {
@@ -33,44 +40,56 @@ test('formats elapsed time as zero-padded minutes and seconds', () => {
 
 test('counts counter clicks in the stats panel', (t) => {
   t.mock.timers.enable({ apis: ['Date', 'setInterval'], now: 0 })
-  const counterButton = new FakeButton()
-  const resetButton = new FakeButton()
+  const counter = new FakeCounterStore()
   const statsElement = new FakeElement()
 
-  setupStats(counterButton, resetButton, statsElement)
-  counterButton.click()
-  counterButton.click()
-  counterButton.click()
+  setupStats(counter, statsElement)
+  counter.update({ value: 3, sessionClicks: 3 })
 
-  assert.equal(statsElement.innerHTML, 'Kliknięcia: 3 · Resety: 0 · Czas: 00:00')
+  assert.equal(statsElement.textContent, 'Kliknięcia: 3 · Resety: 0 · Czas: 00:00')
 })
 
 test('counts reset clicks in the stats panel', (t) => {
   t.mock.timers.enable({ apis: ['Date', 'setInterval'], now: 0 })
-  const counterButton = new FakeButton()
-  const resetButton = new FakeButton()
+  const counter = new FakeCounterStore()
   const statsElement = new FakeElement()
 
-  setupStats(counterButton, resetButton, statsElement)
-  resetButton.click()
-  resetButton.click()
+  setupStats(counter, statsElement)
+  counter.update({ value: 0, sessionResets: 2 })
 
-  assert.equal(statsElement.innerHTML, 'Kliknięcia: 0 · Resety: 2 · Czas: 00:00')
+  assert.equal(statsElement.textContent, 'Kliknięcia: 0 · Resety: 2 · Czas: 00:00')
 })
 
 test('updates elapsed time every second', (t) => {
   t.mock.timers.enable({ apis: ['Date', 'setInterval'], now: 0 })
+  const counter = new FakeCounterStore()
   const statsElement = new FakeElement()
 
-  setupStats(new FakeButton(), new FakeButton(), statsElement)
-  assert.equal(statsElement.innerHTML, 'Kliknięcia: 0 · Resety: 0 · Czas: 00:00')
+  setupStats(counter, statsElement)
+  assert.equal(statsElement.textContent, 'Kliknięcia: 0 · Resety: 0 · Czas: 00:00')
 
   t.mock.timers.tick(1000)
-  assert.equal(statsElement.innerHTML, 'Kliknięcia: 0 · Resety: 0 · Czas: 00:01')
+  assert.equal(statsElement.textContent, 'Kliknięcia: 0 · Resety: 0 · Czas: 00:01')
 
   t.mock.timers.tick(60000)
-  assert.equal(statsElement.innerHTML, 'Kliknięcia: 0 · Resety: 0 · Czas: 01:01')
+  assert.equal(statsElement.textContent, 'Kliknięcia: 0 · Resety: 0 · Czas: 01:01')
 
   t.mock.timers.tick(3600000)
-  assert.equal(statsElement.innerHTML, 'Kliknięcia: 0 · Resety: 0 · Czas: 61:01')
+  assert.equal(statsElement.textContent, 'Kliknięcia: 0 · Resety: 0 · Czas: 61:01')
+})
+
+test('stops updates after cleanup', (t) => {
+  t.mock.timers.enable({ apis: ['Date', 'setInterval'], now: 0 })
+  const counter = new FakeCounterStore()
+  const statsElement = new FakeElement()
+  const cleanup = setupStats(counter, statsElement)
+
+  t.mock.timers.tick(1000)
+  assert.equal(statsElement.textContent, 'Kliknięcia: 0 · Resety: 0 · Czas: 00:01')
+
+  cleanup()
+  counter.update({ value: 1, sessionClicks: 1 })
+  t.mock.timers.tick(1000)
+
+  assert.equal(statsElement.textContent, 'Kliknięcia: 0 · Resety: 0 · Czas: 00:01')
 })
