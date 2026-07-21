@@ -5,7 +5,10 @@ import { setupCounter } from '../src/counter.ts'
 
 class FakeButton {
   innerHTML = ''
+  disabled = false
   listeners = new Map()
+  // stub classList: kod licznika po BAR-106 dodaje/zdejmuje klasę animacji
+  classList = { add() {}, remove() {}, contains: () => false }
 
   addEventListener(event, listener) {
     this.listeners.set(event, listener)
