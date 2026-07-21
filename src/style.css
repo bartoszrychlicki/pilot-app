@@ -216,6 +216,17 @@ code {
   gap: 8px;
 }
 
+.stats {
+  display: flex;
+  gap: 12px;
+  font-size: 0.85rem;
+  color: var(--text);
+}
+
+.stats__item b {
+  font-variant-numeric: tabular-nums;
+}
+
 #app {
   width: 1126px;
   max-width: 100%;
