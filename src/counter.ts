@@ -22,6 +22,7 @@ export function setupCounter(
   callbacks?: {
     onIncrement?: () => void
     onReset?: () => void
+    getClickCount?: () => number
   },
 ) {
   let counter = 0
@@ -36,15 +37,18 @@ export function setupCounter(
         console.warn('Failed to save the counter to localStorage.', error)
       }
     }
-    element.innerHTML = `Licznik: ${counter}`
+    const clickCountLabel = callbacks?.getClickCount
+      ? ` (${callbacks.getClickCount()} kliknięć)`
+      : ''
+    element.innerHTML = `Licznik: ${counter}${clickCountLabel}`
     resetElement.disabled = counter === 0
   }
   const increment = () => {
     element.classList.remove('counter--pulse')
     void element.offsetWidth
     element.classList.add('counter--pulse')
-    setCounter(counter + 1)
     callbacks?.onIncrement?.()
+    setCounter(counter + 1)
   }
   const reset = () => {
     setCounter(0)
