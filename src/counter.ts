@@ -16,6 +16,8 @@ function readStoredCounter(): number {
 export function setupCounter(
   element: HTMLButtonElement,
   resetElement: HTMLButtonElement,
+  copyElement: HTMLButtonElement,
+  feedbackElement: HTMLElement,
   keyTarget: EventTarget = document,
   callbacks?: {
     onIncrement?: () => void
@@ -23,6 +25,8 @@ export function setupCounter(
   },
 ) {
   let counter = 0
+  let isDisposed = false
+  let feedbackTimeout: ReturnType<typeof setTimeout> | undefined
   const setCounter = (count: number) => {
     counter = count
     try {
@@ -46,9 +50,38 @@ export function setupCounter(
     setCounter(0)
     callbacks?.onReset?.()
   }
-  element.addEventListener('animationend', () => element.classList.remove('counter--pulse'))
+  const copy = () => {
+    const clipboard = navigator.clipboard
+    if (!clipboard) {
+      if (import.meta.env?.DEV) {
+        console.warn('Clipboard API is unavailable.')
+      }
+      return
+    }
+
+    clipboard
+      .writeText(String(counter))
+      .then(() => {
+        if (isDisposed) return
+
+        feedbackElement.textContent = 'Skopiowano!'
+        if (feedbackTimeout !== undefined) clearTimeout(feedbackTimeout)
+        feedbackTimeout = setTimeout(() => {
+          feedbackElement.textContent = ''
+          feedbackTimeout = undefined
+        }, 2000)
+      })
+      .catch((error) => {
+        if (import.meta.env?.DEV) {
+          console.warn('Failed to copy the counter value.', error)
+        }
+      })
+  }
+  const handleAnimationEnd = () => element.classList.remove('counter--pulse')
+  element.addEventListener('animationend', handleAnimationEnd)
   element.addEventListener('click', increment)
   resetElement.addEventListener('click', reset)
+  copyElement.addEventListener('click', copy)
   const handleKeydown = (event: Event) => {
     const keyboardEvent = event as KeyboardEvent
     const target = keyboardEvent.target as HTMLElement | null
@@ -76,5 +109,16 @@ export function setupCounter(
   keyTarget.addEventListener('keydown', handleKeydown)
   setCounter(readStoredCounter())
 
-  return () => keyTarget.removeEventListener('keydown', handleKeydown)
+  return () => {
+    isDisposed = true
+    if (feedbackTimeout !== undefined) {
+      clearTimeout(feedbackTimeout)
+      feedbackTimeout = undefined
+    }
+    element.removeEventListener('animationend', handleAnimationEnd)
+    element.removeEventListener('click', increment)
+    resetElement.removeEventListener('click', reset)
+    copyElement.removeEventListener('click', copy)
+    keyTarget.removeEventListener('keydown', handleKeydown)
+  }
 }

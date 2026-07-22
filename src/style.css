@@ -216,6 +216,12 @@ code {
   gap: 8px;
 }
 
+.copy-feedback {
+  min-height: 1.45em;
+  color: var(--accent);
+  font-size: 13px;
+}
+
 .counter-hint {
   font-size: 14px;
   color: var(--text);
