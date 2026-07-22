@@ -49,3 +49,38 @@ test('links the manifest and mobile installation metadata in the document head',
     /<meta\b(?=[^>]*\bname=["']apple-mobile-web-app-capable["'])(?=[^>]*\bcontent=["']yes["'])[^>]*>/i,
   )
 })
+
+test('defines Open Graph metadata in the document head', async () => {
+  const indexHtml = await readFile(indexUrl, 'utf8')
+  const headMatch = indexHtml.match(/<head\b[^>]*>([\s\S]*?)<\/head>/i)
+
+  assert.ok(headMatch)
+
+  const headHtml = headMatch[1]
+  const descriptionMatch = headHtml.match(
+    /<meta\b(?=[^>]*\bname=["']description["'])(?=[^>]*\bcontent=["']([^"']*)["'])[^>]*>/i,
+  )
+  const ogDescriptionMatch = headHtml.match(
+    /<meta\b(?=[^>]*\bproperty=["']og:description["'])(?=[^>]*\bcontent=["']([^"']*)["'])[^>]*>/i,
+  )
+
+  assert.match(
+    headHtml,
+    /<meta\b(?=[^>]*\bproperty=["']og:title["'])(?=[^>]*\bcontent=["']pilot-app["'])[^>]*>/i,
+  )
+  assert.ok(descriptionMatch)
+  assert.ok(ogDescriptionMatch)
+  assert.equal(ogDescriptionMatch[1], descriptionMatch[1])
+  assert.match(
+    headHtml,
+    /<meta\b(?=[^>]*\bproperty=["']og:type["'])(?=[^>]*\bcontent=["']website["'])[^>]*>/i,
+  )
+
+  for (const property of ['og:title', 'og:description', 'og:type']) {
+    const occurrences = indexHtml.match(
+      new RegExp(`property=["']${property}["']`, 'gi'),
+    )
+
+    assert.equal(occurrences?.length ?? 0, 1)
+  }
+})
