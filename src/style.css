@@ -4,9 +4,11 @@
   --bg: #fff;
   --border: #e5e4e7;
   --code-bg: #f4f3ec;
-  --accent: #aa3bff;
-  --accent-bg: rgba(170, 59, 255, 0.1);
-  --accent-border: rgba(170, 59, 255, 0.5);
+  --accent: #863bff;
+  --accent-secondary: #47bfff;
+  --accent-text: #863bff;
+  --accent-bg: #ede6ff;
+  --accent-border: #7e14ff;
   --social-bg: rgba(244, 243, 236, 0.5);
   --shadow:
     rgba(0, 0, 0, 0.1) 0 10px 15px -3px, rgba(0, 0, 0, 0.05) 0 4px 6px -2px;
@@ -38,9 +40,11 @@
     --bg: #16171d;
     --border: #2e303a;
     --code-bg: #1f2028;
-    --accent: #c084fc;
-    --accent-bg: rgba(192, 132, 252, 0.15);
-    --accent-border: rgba(192, 132, 252, 0.5);
+    --accent: #863bff;
+    --accent-secondary: #47bfff;
+    --accent-text: #47bfff;
+    --accent-bg: rgba(134, 59, 255, 0.15);
+    --accent-border: #7e14ff;
     --social-bg: rgba(47, 48, 58, 0.5);
     --shadow:
       rgba(0, 0, 0, 0.4) 0 10px 15px -3px, rgba(0, 0, 0, 0.25) 0 4px 6px -2px;
@@ -53,9 +57,11 @@
   --bg: #16171d;
   --border: #2e303a;
   --code-bg: #1f2028;
-  --accent: #c084fc;
-  --accent-bg: rgba(192, 132, 252, 0.15);
-  --accent-border: rgba(192, 132, 252, 0.5);
+  --accent: #863bff;
+  --accent-secondary: #47bfff;
+  --accent-text: #47bfff;
+  --accent-bg: rgba(134, 59, 255, 0.15);
+  --accent-border: #7e14ff;
   --social-bg: rgba(47, 48, 58, 0.5);
   --shadow:
     rgba(0, 0, 0, 0.4) 0 10px 15px -3px, rgba(0, 0, 0, 0.25) 0 4px 6px -2px;
@@ -67,9 +73,11 @@
   --bg: #fff;
   --border: #e5e4e7;
   --code-bg: #f4f3ec;
-  --accent: #aa3bff;
-  --accent-bg: rgba(170, 59, 255, 0.1);
-  --accent-border: rgba(170, 59, 255, 0.5);
+  --accent: #863bff;
+  --accent-secondary: #47bfff;
+  --accent-text: #863bff;
+  --accent-bg: #ede6ff;
+  --accent-border: #7e14ff;
   --social-bg: rgba(244, 243, 236, 0.5);
   --shadow:
     rgba(0, 0, 0, 0.1) 0 10px 15px -3px, rgba(0, 0, 0, 0.05) 0 4px 6px -2px;
@@ -144,7 +152,7 @@ code,
   padding: 0;
   border: 2px solid transparent;
   border-radius: 50%;
-  color: var(--accent);
+  color: var(--accent-text);
   background: var(--accent-bg);
   font-size: 20px;
   line-height: 1;
@@ -156,7 +164,7 @@ code,
   }
 
   &:focus-visible {
-    outline: 2px solid var(--accent);
+    outline: 2px solid var(--accent-text);
     outline-offset: 2px;
   }
 
@@ -177,7 +185,7 @@ code {
   font-size: 16px;
   padding: 5px 10px;
   border-radius: 5px;
-  color: var(--accent);
+  color: var(--accent-text);
   background: var(--accent-bg);
   border: 2px solid transparent;
   transition: border-color 0.3s;
@@ -187,7 +195,7 @@ code {
     border-color: var(--accent-border);
   }
   &:focus-visible {
-    outline: 2px solid var(--accent);
+    outline: 2px solid var(--accent-text);
     outline-offset: 2px;
   }
 }
