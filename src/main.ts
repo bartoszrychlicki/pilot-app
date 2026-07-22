@@ -20,6 +20,7 @@ ${renderThemeToggle()}
   </div>
   <span id="copy-feedback" class="copy-feedback" aria-live="polite"></span>
   <p class="counter-hint">Skróty: + / = zwiększ, r reset (nieaktywne w polach tekstowych)</p>
+  <h3>Ta sesja</h3>
   <div class="stats-panel" id="stats-panel"></div>
 </section>
 

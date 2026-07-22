@@ -110,6 +110,13 @@ h2 {
     font-size: 20px;
   }
 }
+h3 {
+  font-family: var(--heading);
+  color: var(--text-h);
+  font-weight: 500;
+  font-size: 18px;
+  margin: 0 0 8px;
+}
 p {
   margin: 0;
 }
