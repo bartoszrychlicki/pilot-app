@@ -21,3 +21,7 @@ npm run dev
 npm run build
 npm test
 ```
+
+## Licencja
+
+MIT — projekt demonstracyjny ai-factory.
