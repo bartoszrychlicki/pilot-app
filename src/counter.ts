@@ -70,6 +70,11 @@ export function setupCounter(
   const copy = () => {
     const clipboard = navigator.clipboard
     if (!clipboard) {
+      feedbackElement.textContent = 'Nie udało się skopiować'
+      if (feedbackTimeout !== undefined) {
+        clearTimeout(feedbackTimeout)
+        feedbackTimeout = undefined
+      }
       if (import.meta.env?.DEV) {
         console.warn('Clipboard API is unavailable.')
       }
@@ -89,6 +94,13 @@ export function setupCounter(
         }, 2000)
       })
       .catch((error) => {
+        if (isDisposed) return
+
+        feedbackElement.textContent = 'Nie udało się skopiować'
+        if (feedbackTimeout !== undefined) {
+          clearTimeout(feedbackTimeout)
+          feedbackTimeout = undefined
+        }
         if (import.meta.env?.DEV) {
           console.warn('Failed to copy the counter value.', error)
         }

@@ -420,7 +420,7 @@ test('copies the current counter value and hides confirmation after two seconds'
   )
 })
 
-test('does not throw when the Clipboard API is unavailable', () => {
+test('shows an error message when the Clipboard API is unavailable', () => {
   const navigatorDescriptor = Object.getOwnPropertyDescriptor(globalThis, 'navigator')
   Object.defineProperty(globalThis, 'navigator', {
     configurable: true,
@@ -430,9 +430,10 @@ test('does not throw when the Clipboard API is unavailable', () => {
   try {
     withLocalStorage(createMemoryStorage(), () => {
       const counterButton = new FakeButton()
-      const { copyButton } = setupTestCounter(counterButton)
+      const { copyButton, feedbackElement } = setupTestCounter(counterButton)
 
       assert.doesNotThrow(() => copyButton.click())
+      assert.equal(feedbackElement.textContent, 'Nie udało się skopiować')
     })
   } finally {
     if (navigatorDescriptor) {
@@ -441,6 +442,26 @@ test('does not throw when the Clipboard API is unavailable', () => {
       delete globalThis.navigator
     }
   }
+})
+
+test('shows an error message when writeText rejects', async () => {
+  await withClipboard(
+    async () => {
+      throw new Error('denied')
+    },
+    async () => {
+      await withLocalStorage(createMemoryStorage(), async () => {
+        const counterButton = new FakeButton()
+        const { copyButton, feedbackElement } = setupTestCounter(counterButton)
+
+        copyButton.click()
+        await Promise.resolve()
+        await Promise.resolve()
+
+        assert.equal(feedbackElement.textContent, 'Nie udało się skopiować')
+      })
+    },
+  )
 })
 
 test('cleanup cancels pending copy feedback timeout', async (t) => {
