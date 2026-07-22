@@ -110,7 +110,7 @@ describe('renderThemeToggle', () => {
 
     assert.equal(
       renderThemeToggle(),
-      '<button id="theme-toggle" type="button" class="theme-toggle" aria-label="Przełącz na tryb ciemny">☀️</button>',
+      '<button id="theme-toggle" type="button" class="theme-toggle" aria-label="Przełącz na tryb ciemny" title="Przełącz na tryb ciemny">☀️</button>',
     )
   })
 
@@ -119,7 +119,7 @@ describe('renderThemeToggle', () => {
 
     assert.equal(
       renderThemeToggle(),
-      '<button id="theme-toggle" type="button" class="theme-toggle" aria-label="Przełącz na tryb jasny">🌙</button>',
+      '<button id="theme-toggle" type="button" class="theme-toggle" aria-label="Przełącz na tryb jasny" title="Przełącz na tryb jasny">🌙</button>',
     )
   })
 })
@@ -152,4 +152,5 @@ test('the toggle switches the theme, persists it and updates its accessible cont
   assert.equal(savedTheme, 'dark')
   assert.equal(button.textContent, '🌙')
   assert.equal(attributes.get('aria-label'), 'Przełącz na tryb jasny')
+  assert.equal(attributes.get('title'), 'Przełącz na tryb jasny')
 })

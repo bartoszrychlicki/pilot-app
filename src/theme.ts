@@ -34,10 +34,9 @@ export function getCurrentTheme(): Theme {
 
 function updateThemeToggle(button: HTMLButtonElement, theme: Theme): void {
   button.textContent = theme === 'dark' ? '🌙' : '☀️'
-  button.setAttribute(
-    'aria-label',
-    theme === 'dark' ? 'Przełącz na tryb jasny' : 'Przełącz na tryb ciemny',
-  )
+  const label = theme === 'dark' ? 'Przełącz na tryb jasny' : 'Przełącz na tryb ciemny'
+  button.setAttribute('aria-label', label)
+  button.setAttribute('title', label)
 }
 
 export function renderThemeToggle(): string {
@@ -45,7 +44,7 @@ export function renderThemeToggle(): string {
   const icon = theme === 'dark' ? '🌙' : '☀️'
   const label = theme === 'dark' ? 'Przełącz na tryb jasny' : 'Przełącz na tryb ciemny'
 
-  return `<button id="theme-toggle" type="button" class="theme-toggle" aria-label="${label}">${icon}</button>`
+  return `<button id="theme-toggle" type="button" class="theme-toggle" aria-label="${label}" title="${label}">${icon}</button>`
 }
 
 export function setupThemeToggle(button: HTMLButtonElement): void {
