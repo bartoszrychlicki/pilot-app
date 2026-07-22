@@ -56,6 +56,7 @@ function setupStats(panel: HTMLElement) {
   return {
     onIncrement,
     onReset,
+    getClickCount: () => stats.getClicks(),
     dispose: () => window.clearInterval(intervalId),
   }
 }

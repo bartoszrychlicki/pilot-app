@@ -338,6 +338,56 @@ test('reports increments and resets from clicks and keyboard shortcuts', () => {
   })
 })
 
+test('shows the click count next to the counter label when provided', () => {
+  withLocalStorage(createMemoryStorage(), () => {
+    const counterButton = new FakeButton()
+    let clicks = 0
+
+    setupTestCounter(counterButton, new FakeButton(), new FakeEventTarget(), {
+      onIncrement: () => {
+        clicks += 1
+      },
+      getClickCount: () => clicks,
+    })
+
+    assert.equal(counterButton.innerHTML, 'Licznik: 0 (0 kliknięć)')
+
+    counterButton.click()
+    assert.equal(counterButton.innerHTML, 'Licznik: 1 (1 kliknięcie)')
+
+    counterButton.click()
+    assert.equal(counterButton.innerHTML, 'Licznik: 2 (2 kliknięcia)')
+
+    counterButton.click()
+    counterButton.click()
+    assert.equal(counterButton.innerHTML, 'Licznik: 4 (4 kliknięcia)')
+
+    counterButton.click()
+    assert.equal(counterButton.innerHTML, 'Licznik: 5 (5 kliknięć)')
+  })
+})
+
+test('reset does not clear the session click count', () => {
+  withLocalStorage(createMemoryStorage(), () => {
+    const counterButton = new FakeButton()
+    const resetButton = new FakeButton()
+    let clicks = 0
+
+    setupTestCounter(counterButton, resetButton, new FakeEventTarget(), {
+      onIncrement: () => {
+        clicks += 1
+      },
+      getClickCount: () => clicks,
+    })
+
+    counterButton.click()
+    counterButton.click()
+    resetButton.click()
+
+    assert.equal(counterButton.innerHTML, 'Licznik: 0 (2 kliknięcia)')
+  })
+})
+
 test('copies the current counter value and hides confirmation after two seconds', async (t) => {
   t.mock.timers.enable({ apis: ['setTimeout'] })
   const copiedValues = []

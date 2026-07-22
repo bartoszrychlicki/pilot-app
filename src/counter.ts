@@ -1,5 +1,17 @@
 const STORAGE_KEY = 'pilot-counter'
 
+function getClickNoun(count: number): string {
+  if (count === 1) return 'kliknięcie'
+
+  const lastDigit = count % 10
+  const lastTwoDigits = count % 100
+  if (lastDigit >= 2 && lastDigit <= 4 && (lastTwoDigits < 12 || lastTwoDigits > 14)) {
+    return 'kliknięcia'
+  }
+
+  return 'kliknięć'
+}
+
 function readStoredCounter(): number {
   try {
     const storedCounter = localStorage.getItem(STORAGE_KEY)
@@ -22,6 +34,7 @@ export function setupCounter(
   callbacks?: {
     onIncrement?: () => void
     onReset?: () => void
+    getClickCount?: () => number
   },
 ) {
   let counter = 0
@@ -36,15 +49,19 @@ export function setupCounter(
         console.warn('Failed to save the counter to localStorage.', error)
       }
     }
-    element.innerHTML = `Licznik: ${counter}`
+    const clickCount = callbacks?.getClickCount?.()
+    const clickCountLabel =
+      clickCount === undefined ? '' : ` (${clickCount} ${getClickNoun(clickCount)})`
+    element.innerHTML = `Licznik: ${counter}${clickCountLabel}`
     resetElement.disabled = counter === 0
   }
   const increment = () => {
     element.classList.remove('counter--pulse')
     void element.offsetWidth
     element.classList.add('counter--pulse')
-    setCounter(counter + 1)
+    // Update click stats first so getClickCount() renders the latest value.
     callbacks?.onIncrement?.()
+    setCounter(counter + 1)
   }
   const reset = () => {
     setCounter(0)
