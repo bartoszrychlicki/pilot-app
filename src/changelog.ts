@@ -1,5 +1,21 @@
 const CHANGELOG_STORAGE_KEY = 'pilot-changelog-open'
 
+const CHANGELOG_ENTRIES: ReadonlyArray<{ id: string; description: string }> = [
+  { id: 'TEST-2', description: 'Dodano stopkę z nazwą i wersją aplikacji.' },
+  { id: 'TEST-3', description: 'Dodano przycisk resetujący licznik.' },
+  { id: 'TEST-4', description: 'Dodano bieżący rok w stopce.' },
+  { id: 'BAR-95', description: 'Zastąpiono domyślny ekran Vite ekranem powitalnym.' },
+  { id: 'BAR-96', description: 'Dodano znak © przed rokiem w stopce.' },
+  { id: 'BAR-98', description: 'Spolszczono etykietę przycisku licznika.' },
+  { id: 'BAR-99', description: 'Ustawiono polski język strony i meta description.' },
+  { id: 'BAR-100', description: 'Dodano logo aplikacji (wordmark) na stronie głównej.' },
+  { id: 'BAR-105', description: 'Dodano link do GitHub w stopce.' },
+  {
+    id: 'BAR-106',
+    description: 'Dodano animację kliknięcia i inteligentny stan przycisku Reset dla licznika.',
+  },
+]
+
 export function resolveChangelogOpen(stored: string | null): boolean {
   return stored === 'true'
 }
@@ -12,22 +28,15 @@ function getChangelogOpen(): boolean {
   }
 }
 
+function renderChangelogEntry(entry: { id: string; description: string }): string {
+  return `<li><strong>${entry.id}:</strong> ${entry.description}</li>`
+}
+
 export function renderChangelog(open: boolean = getChangelogOpen()): string {
   return `
     <details id="changelog-details"${open ? ' open' : ''}>
-      <summary>Dokonane zmiany w projekcie</summary>
-      <ul>
-        <li><strong>TEST-2:</strong> Dodano stopkę z nazwą i wersją aplikacji.</li>
-        <li><strong>TEST-3:</strong> Dodano przycisk resetujący licznik.</li>
-        <li><strong>TEST-4:</strong> Dodano bieżący rok w stopce.</li>
-        <li><strong>BAR-95:</strong> Zastąpiono domyślny ekran Vite ekranem powitalnym.</li>
-        <li><strong>BAR-96:</strong> Dodano znak © przed rokiem w stopce.</li>
-        <li><strong>BAR-98:</strong> Spolszczono etykietę przycisku licznika.</li>
-        <li><strong>BAR-99:</strong> Ustawiono polski język strony i meta description.</li>
-        <li><strong>BAR-100:</strong> Dodano logo aplikacji (wordmark) na stronie głównej.</li>
-        <li><strong>BAR-105:</strong> Dodano link do GitHub w stopce.</li>
-        <li><strong>BAR-106:</strong> Dodano animację kliknięcia i inteligentny stan przycisku Reset dla licznika.</li>
-      </ul>
+      <summary>Dokonane zmiany w projekcie (${CHANGELOG_ENTRIES.length})</summary>
+      <ul>${CHANGELOG_ENTRIES.map(renderChangelogEntry).join('')}</ul>
     </details>
   `
 }
