@@ -25,3 +25,7 @@ npm test
 ## Licencja
 
 MIT — projekt demonstracyjny ai-factory.
+
+## Rozwój
+
+Aplikacja rozwijana automatycznie przez ai-factory — każda zmiana przechodzi plan, build, weryfikację i code review.
