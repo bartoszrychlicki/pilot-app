@@ -4,8 +4,9 @@
   --bg: #fff;
   --border: #e5e4e7;
   --code-bg: #f4f3ec;
+  /* Keep the logo purple; interactive text may switch to cyan for dark-mode
+     contrast, while its backgrounds and borders retain the purple treatment. */
   --accent: #863bff;
-  --accent-secondary: #47bfff;
   --accent-text: #863bff;
   --accent-bg: #ede6ff;
   --accent-border: #7e14ff;
@@ -41,7 +42,6 @@
     --border: #2e303a;
     --code-bg: #1f2028;
     --accent: #863bff;
-    --accent-secondary: #47bfff;
     --accent-text: #47bfff;
     --accent-bg: rgba(134, 59, 255, 0.15);
     --accent-border: #7e14ff;
@@ -58,7 +58,6 @@
   --border: #2e303a;
   --code-bg: #1f2028;
   --accent: #863bff;
-  --accent-secondary: #47bfff;
   --accent-text: #47bfff;
   --accent-bg: rgba(134, 59, 255, 0.15);
   --accent-border: #7e14ff;
@@ -74,7 +73,6 @@
   --border: #e5e4e7;
   --code-bg: #f4f3ec;
   --accent: #863bff;
-  --accent-secondary: #47bfff;
   --accent-text: #863bff;
   --accent-bg: #ede6ff;
   --accent-border: #7e14ff;
