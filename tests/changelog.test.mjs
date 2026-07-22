@@ -14,12 +14,23 @@ test('renders the changelog collapsed by default', () => {
   const changelog = renderChangelog(false)
 
   assert.match(changelog, /<details id="changelog-details">/)
-  assert.match(changelog, /<summary>Dokonane zmiany w projekcie<\/summary>/)
+  assert.match(changelog, /<summary>Dokonane zmiany w projekcie \(10\)<\/summary>/)
   assert.doesNotMatch(changelog, /<details[^>]* open/)
 })
 
 test('renders the changelog open when requested', () => {
   assert.match(renderChangelog(true), /<details id="changelog-details" open>/)
+})
+
+test('renders the entry count in the changelog summary', () => {
+  const changelog = renderChangelog()
+  const summaryMatch = changelog.match(
+    /<summary>Dokonane zmiany w projekcie \((\d+)\)<\/summary>/,
+  )
+  const entryCount = (changelog.match(/<li>/g) ?? []).length
+
+  assert.ok(summaryMatch)
+  assert.equal(Number(summaryMatch[1]), entryCount)
 })
 
 test('persists the changelog state when it is toggled', (t) => {
