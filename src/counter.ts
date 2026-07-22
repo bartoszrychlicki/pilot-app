@@ -25,6 +25,7 @@ export function setupCounter(
   },
 ) {
   let counter = 0
+  let isDisposed = false
   let feedbackTimeout: ReturnType<typeof setTimeout> | undefined
   const setCounter = (count: number) => {
     counter = count
@@ -50,13 +51,24 @@ export function setupCounter(
     callbacks?.onReset?.()
   }
   const copy = () => {
-    navigator.clipboard
+    const clipboard = navigator.clipboard
+    if (!clipboard) {
+      if (import.meta.env?.DEV) {
+        console.warn('Clipboard API is unavailable.')
+      }
+      return
+    }
+
+    clipboard
       .writeText(String(counter))
       .then(() => {
+        if (isDisposed) return
+
         feedbackElement.textContent = 'Skopiowano!'
         if (feedbackTimeout !== undefined) clearTimeout(feedbackTimeout)
         feedbackTimeout = setTimeout(() => {
           feedbackElement.textContent = ''
+          feedbackTimeout = undefined
         }, 2000)
       })
       .catch((error) => {
@@ -65,7 +77,8 @@ export function setupCounter(
         }
       })
   }
-  element.addEventListener('animationend', () => element.classList.remove('counter--pulse'))
+  const handleAnimationEnd = () => element.classList.remove('counter--pulse')
+  element.addEventListener('animationend', handleAnimationEnd)
   element.addEventListener('click', increment)
   resetElement.addEventListener('click', reset)
   copyElement.addEventListener('click', copy)
@@ -96,5 +109,16 @@ export function setupCounter(
   keyTarget.addEventListener('keydown', handleKeydown)
   setCounter(readStoredCounter())
 
-  return () => keyTarget.removeEventListener('keydown', handleKeydown)
+  return () => {
+    isDisposed = true
+    if (feedbackTimeout !== undefined) {
+      clearTimeout(feedbackTimeout)
+      feedbackTimeout = undefined
+    }
+    element.removeEventListener('animationend', handleAnimationEnd)
+    element.removeEventListener('click', increment)
+    resetElement.removeEventListener('click', reset)
+    copyElement.removeEventListener('click', copy)
+    keyTarget.removeEventListener('keydown', handleKeydown)
+  }
 }

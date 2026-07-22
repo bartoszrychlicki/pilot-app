@@ -14,6 +14,12 @@ class FakeButton {
     this.listeners.set(event, listener)
   }
 
+  removeEventListener(event, listener) {
+    if (this.listeners.get(event) === listener) {
+      this.listeners.delete(event)
+    }
+  }
+
   click() {
     this.listeners.get('click')?.()
   }
@@ -278,6 +284,21 @@ test('cleanup removes the keydown listener', () => {
   })
 })
 
+test('cleanup removes button and animation listeners', () => {
+  withLocalStorage(createMemoryStorage('2'), () => {
+    const counterButton = new FakeButton()
+    const resetButton = new FakeButton()
+    const { cleanup, copyButton } = setupTestCounter(counterButton, resetButton)
+
+    cleanup()
+
+    assert.equal(counterButton.listeners.has('animationend'), false)
+    assert.equal(counterButton.listeners.has('click'), false)
+    assert.equal(resetButton.listeners.has('click'), false)
+    assert.equal(copyButton.listeners.has('click'), false)
+  })
+})
+
 test('unrecognized shortcuts do not change the counter', () => {
   withLocalStorage(createMemoryStorage('3'), () => {
     const counterButton = new FakeButton()
@@ -343,6 +364,53 @@ test('copies the current counter value and hides confirmation after two seconds'
 
           t.mock.timers.tick(1)
           assert.equal(feedbackElement.textContent, '')
+        })
+      })
+    },
+  )
+})
+
+test('does not throw when the Clipboard API is unavailable', () => {
+  const navigatorDescriptor = Object.getOwnPropertyDescriptor(globalThis, 'navigator')
+  Object.defineProperty(globalThis, 'navigator', {
+    configurable: true,
+    value: {},
+  })
+
+  try {
+    withLocalStorage(createMemoryStorage(), () => {
+      const counterButton = new FakeButton()
+      const { copyButton } = setupTestCounter(counterButton)
+
+      assert.doesNotThrow(() => copyButton.click())
+    })
+  } finally {
+    if (navigatorDescriptor) {
+      Object.defineProperty(globalThis, 'navigator', navigatorDescriptor)
+    } else {
+      delete globalThis.navigator
+    }
+  }
+})
+
+test('cleanup cancels pending copy feedback timeout', async (t) => {
+  t.mock.timers.enable({ apis: ['setTimeout'] })
+
+  await withClipboard(
+    async () => {},
+    async () => {
+      await withLocalStorage(createMemoryStorage(), () => {
+        const counterButton = new FakeButton()
+        const { cleanup, copyButton, feedbackElement } = setupTestCounter(counterButton)
+
+        copyButton.click()
+        return Promise.resolve().then(() => {
+          assert.equal(feedbackElement.textContent, 'Skopiowano!')
+          cleanup()
+          feedbackElement.textContent = 'odmontowano'
+
+          t.mock.timers.tick(2000)
+          assert.equal(feedbackElement.textContent, 'odmontowano')
         })
       })
     },
