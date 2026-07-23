@@ -44,6 +44,48 @@ test('increments, resets, persists and handles keyboard shortcuts', () => {
   assert.equal(resets, 1)
 })
 
+test('decrements to zero, persists the value and leaves session statistics unchanged', () => {
+  let increments = 0
+  let resets = 0
+  render(
+    <CounterCard
+      clickCount={0}
+      onIncrement={() => {
+        increments += 1
+      }}
+      onReset={() => {
+        resets += 1
+      }}
+    />,
+  )
+
+  const counter = screen.getByRole('button', { name: /Licznik: 0/ })
+  const decrement = screen.getByRole('button', { name: 'Zmniejsz licznik o 1' })
+  assert.equal(decrement.hasAttribute('disabled'), true)
+
+  fireEvent.click(decrement)
+  assert.match(counter.textContent ?? '', /Licznik: 0/)
+  assert.equal(localStorage.getItem('pilot-counter'), '0')
+
+  fireEvent.click(counter)
+  fireEvent.click(counter)
+  assert.match(counter.textContent ?? '', /Licznik: 2/)
+  assert.equal(increments, 2)
+
+  fireEvent.click(decrement)
+  assert.match(counter.textContent ?? '', /Licznik: 1/)
+  assert.equal(localStorage.getItem('pilot-counter'), '1')
+  assert.equal(increments, 2)
+  assert.equal(resets, 0)
+
+  fireEvent.click(decrement)
+  assert.match(counter.textContent ?? '', /Licznik: 0/)
+  assert.equal(localStorage.getItem('pilot-counter'), '0')
+  assert.equal(decrement.hasAttribute('disabled'), true)
+  assert.equal(increments, 2)
+  assert.equal(resets, 0)
+})
+
 test('ignores shortcuts in text fields and restarts the pulse animation', () => {
   render(<CounterCard />)
   const counter = screen.getByRole('button', { name: /Licznik: 0/ })
