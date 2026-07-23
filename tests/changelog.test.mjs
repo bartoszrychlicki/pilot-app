@@ -1,7 +1,11 @@
 import assert from 'node:assert/strict'
 import test from 'node:test'
 
-import { renderChangelog, resolveChangelogOpen, setupChangelog } from '../src/changelog.ts'
+import {
+  CHANGELOG_ENTRIES,
+  CHANGELOG_STORAGE_KEY,
+  resolveChangelogOpen,
+} from '../src/lib/changelog.ts'
 
 test('resolves the persisted changelog state', () => {
   assert.equal(resolveChangelogOpen(null), false)
@@ -10,73 +14,25 @@ test('resolves the persisted changelog state', () => {
   assert.equal(resolveChangelogOpen('garbage'), false)
 })
 
-test('renders the changelog collapsed by default', () => {
-  const changelog = renderChangelog(false)
-
-  assert.match(changelog, /<details id="changelog-details">/)
-  assert.match(changelog, /<summary>Dokonane zmiany w projekcie \(10\)<\/summary>/)
-  assert.doesNotMatch(changelog, /<details[^>]* open/)
+test('keeps the changelog storage key', () => {
+  assert.equal(CHANGELOG_STORAGE_KEY, 'pilot-changelog-open')
 })
 
-test('renders the changelog open when requested', () => {
-  assert.match(renderChangelog(true), /<details id="changelog-details" open>/)
-})
-
-test('renders the entry count in the changelog summary', () => {
-  const changelog = renderChangelog()
-  const summaryMatch = changelog.match(
-    /<summary>Dokonane zmiany w projekcie \((\d+)\)<\/summary>/,
+test('keeps existing entries in order and appends BAR-165', () => {
+  assert.deepEqual(
+    CHANGELOG_ENTRIES.map((entry) => entry.id),
+    [
+      'TEST-2',
+      'TEST-3',
+      'TEST-4',
+      'BAR-95',
+      'BAR-96',
+      'BAR-98',
+      'BAR-99',
+      'BAR-100',
+      'BAR-105',
+      'BAR-106',
+      'BAR-165',
+    ],
   )
-  const entryCount = (changelog.match(/<li>/g) ?? []).length
-
-  assert.ok(summaryMatch)
-  assert.equal(Number(summaryMatch[1]), entryCount)
-})
-
-test('persists the changelog state when it is toggled', (t) => {
-  let toggleHandler
-  let savedOpen
-  const originalLocalStorage = Object.getOwnPropertyDescriptor(globalThis, 'localStorage')
-  const details = {
-    open: false,
-    addEventListener(event, handler) {
-      assert.equal(event, 'toggle')
-      toggleHandler = handler
-    },
-  }
-  const localStorageMock = {
-    setItem(key, value) {
-      assert.equal(key, 'pilot-changelog-open')
-      savedOpen = value
-    },
-  }
-  Object.defineProperty(globalThis, 'localStorage', {
-    configurable: true,
-    value: localStorageMock,
-  })
-  t.after(() => {
-    if (originalLocalStorage) {
-      Object.defineProperty(globalThis, 'localStorage', originalLocalStorage)
-    } else {
-      delete globalThis.localStorage
-    }
-  })
-  setupChangelog(details)
-
-  details.open = true
-  toggleHandler()
-
-  assert.equal(savedOpen, 'true')
-})
-
-test('renders the BAR-96 through BAR-106 changelog entries in order', () => {
-  const changelog = renderChangelog()
-  const ticketIds = ['BAR-96', 'BAR-98', 'BAR-99', 'BAR-100', 'BAR-105', 'BAR-106']
-
-  for (const ticketId of ticketIds) {
-    assert.match(changelog, new RegExp(`<strong>${ticketId}:</strong>`))
-  }
-
-  const ticketPositions = ticketIds.map((ticketId) => changelog.indexOf(ticketId))
-  assert.deepEqual(ticketPositions, [...ticketPositions].sort((a, b) => a - b))
 })

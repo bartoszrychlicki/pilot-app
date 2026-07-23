@@ -1,7 +1,7 @@
 import assert from 'node:assert/strict'
 import test from 'node:test'
 
-import { createSessionStats, formatDuration } from '../src/stats.ts'
+import { createSessionStats, formatDuration } from '../src/lib/stats.ts'
 
 test('formats elapsed time as minutes and seconds', () => {
   assert.equal(formatDuration(0), '00:00')
