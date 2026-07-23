@@ -77,6 +77,10 @@ export function CounterCard({ clickCount, onIncrement, onReset }: CounterCardPro
     setCounter((value) => value + 1)
   }, [onIncrement, pulse])
 
+  const decrement = useCallback(() => {
+    setCounter((value) => Math.max(0, value - 1))
+  }, [])
+
   const reset = useCallback(() => {
     setCounter(0)
     onReset?.()
@@ -153,6 +157,16 @@ export function CounterCard({ clickCount, onIncrement, onReset }: CounterCardPro
         >
           Licznik: {counter}
           {clickCountLabel}
+        </Button>
+        <Button
+          type="button"
+          variant="outline"
+          className="counter-card__secondary"
+          aria-label="Zmniejsz licznik o 1"
+          disabled={counter === 0}
+          onClick={decrement}
+        >
+          −1
         </Button>
         <Button
           type="button"
